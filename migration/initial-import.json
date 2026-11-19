@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "source_catalog": "https://flowgraph-catalog.fbw-es.com/workflows/",
+  "imported_at": "2026-11-19T23:03:18Z",
+  "workflow_count": 12,
+  "entries": [
+    {
+      "catalog_key": "mesh-format-conversion-with-muscat/1.0.0",
+      "source_id": "1",
+      "source_revision": 63520436718952,
+      "workflow_sha256": "25346d2d29404289fa74c212a651ee8ba5ef5dfc1e1fb077e3181d00615f4e68",
+      "metadata_sha256": "ed6c14bd955b5afb7d28f30f5378af52df00cb7510bbcd37bc8c2201a6658de3"
+    },
+    {
+      "catalog_key": "simple-python-user-function-example-demo/1.0.0",
+      "source_id": "2",
+      "source_revision": 267874829591543,
+      "workflow_sha256": "0ea51992fe2fcc6f8b4edb597e90e733ccf713995df31351e581777b6f99fc75",
+      "metadata_sha256": "415e7aecd2aed68b1d667446a9d0b9d3356d801112e20087fb2f8c93a71b045e"
+    },
+    {
+      "catalog_key": "complex-image-workflow-demo/1.0.0",
+      "source_id": "3",
+      "source_revision": 171006496905357,
+      "workflow_sha256": "4d958e62a843f1a7626d96622bc8bbf6f9fbc601285ccc8059eed7318fe3cc35",
+      "metadata_sha256": "305b3f5c1d6fd0cee31a0f63ea61213c2bfc736452ebebe2f5eef61ea472ad77"
+    },
+    {
+      "catalog_key": "image-fluency-metric/1.0.0",
+      "source_id": "4",
+      "source_revision": 24310776150124,
+      "workflow_sha256": "20bbe88d25a4ec22361b0fb18a0b6476410d22044d1789d85216ad40beaaf869",
+      "metadata_sha256": "5e49aa76cfdc3e6bc8bb9416856df74513b1c1854545ccfd31a964eba340b0f4"
+    },
+    {
+      "catalog_key": "select-paths-and-list-directory-files/1.0.0",
+      "source_id": "5",
+      "source_revision": 168198683231200,
+      "workflow_sha256": "592604b7aa7a0b13d03ad579b7264bd67ad5c948d00f300afb94ff7f74b9d934",
+      "metadata_sha256": "9911179c910b06febcb515f3132d28691ba4f9bc140fa546097762c0e0b50378"
+    },
+    {
+      "catalog_key": "list-and-vector-inputs-demo/1.0.0",
+      "source_id": "6",
+      "source_revision": 234618307551866,
+      "workflow_sha256": "4a1025fd23503f267b8e56be79a7cb4d22d7d4acc6e805e224e8842b51027599",
+      "metadata_sha256": "cc6c51ac6147727ce3e32cf3d34ef84f6fdb98c484b495997fb1683c92fea7f7"
+    },
+    {
+      "catalog_key": "scalar-inputs-text-booleans-and-numbers-demo/1.0.0",
+      "source_id": "7",
+      "source_revision": 160695546904216,
+      "workflow_sha256": "48494994468febb493496af199b96c0b60dc120cf4f2bc89ede2e265a6652cf0",
+      "metadata_sha256": "51841ee766e1bcd6fc0841772dac68891d55f06bdeff4be2374989c0269244e7"
+    },
+    {
+      "catalog_key": "mesh-surfaces-fields-and-tetrahedra/1.0.0",
+      "source_id": "8",
+      "source_revision": 281450388351360,
+      "workflow_sha256": "a2c073b700e823fd3e4385ecc4b0c36f59ba3f66a8ee17a9c02b0081ba7b4d06",
+      "metadata_sha256": "8dc52e0f845ed887d8afd9348e1ec253a329560ff7e4647001e72996d7a0bcfe"
+    },
+    {
+      "catalog_key": "multi-time-step-mesh-file-format-converter/1.0.0",
+      "source_id": "9",
+      "source_revision": 257534666829914,
+      "workflow_sha256": "584069717a504da75fcec679281cbac0852c3ee344afa42fdd707db4d4da01f7",
+      "metadata_sha256": "aa8f926510047da7cd3297a3dc9737bbf0d5c42c0b91303f90cc94f4cf5fcda4"
+    },
+    {
+      "catalog_key": "remesh-a-tetrahedral-cube/1.0.0",
+      "source_id": "10",
+      "source_revision": 213639049034524,
+      "workflow_sha256": "b1e3dc3b13c370918aa8f1723dd3d7b195a932d5d26efe86cc57887f79af5409",
+      "metadata_sha256": "a11c005546c723f01190e9d38f2ca0285e4f7e51b43ed8e59c53601d3471f8b1"
+    },
+    {
+      "catalog_key": "read-and-display-a-mesh/1.0.0",
+      "source_id": "11",
+      "source_revision": 275864141093408,
+      "workflow_sha256": "a337205ef8bdac169e07c6a9ccbd78b79fa73bbbd1d1871f22c9c5270086c84e",
+      "metadata_sha256": "1c7aa5cb3bc035c0799eed854e4e79df1fdd7737923a37efc5f0d165e89d3c56"
+    },
+    {
+      "catalog_key": "explore-a-plaid-dataset/1.0.0",
+      "source_id": "12",
+      "source_revision": 158237293269223,
+      "workflow_sha256": "d5dd53a36a94215b14cc1c0b05b40612eeb233c64bc05662d5d696917794fd92",
+      "metadata_sha256": "f10c66e78f683e44cdcacba8374144f415113314b60770bfc7e51e377ebe0a11"
+    }
+  ]
+}

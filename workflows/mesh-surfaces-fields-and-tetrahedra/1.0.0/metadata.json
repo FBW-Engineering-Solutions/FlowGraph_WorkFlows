@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "mesh-surfaces-fields-and-tetrahedra/1.0.0",
+  "workflow_name": "Mesh, Surfaces, Fields, and Tetrahedra",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Mesh Laboratory: Surfaces, Fields, and Tetrahedra\r\n\r\nThis workflow demonstrates three mesh-processing branches using bundled sample files:\r\n\r\n- **STL:** Display the original mesh, create a copy shifted along the Y axis, and export it.\r\n- **XDMF:** Select and tag existing surface elements, extract them, then shift and display the result colored by `RegionId`.\r\n- **CSV point cloud:** Convert coordinate columns into points, generate a tetrahedral volume with **Delaunay 3D**, and display it colored by `Points_2`. Export the mesh and a spreadsheet of its node fields.\r\n\r\n## Try it\r\n\r\n1. Choose **Demos → Add demo files to temporary user files**.\r\n2. Click **Run workflow** and open the **3D view** to compare the four displayed meshes.\r\n3. Refresh **User files** to download the generated meshes and `Demo-Sphere-fields.xlsx`.\r\n\r\n> **Note:** Keep each XDMF file together with its companion HDF5 file, including when downloading exports. Delaunay 3D fills the point cloud’s convex hull; it is not a constrained or quality-controlled mesher.",
+  "uploaded_at": "2026-11-02T11:42:56Z",
+  "json_filename": "workflow.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "8"
+  }
+}

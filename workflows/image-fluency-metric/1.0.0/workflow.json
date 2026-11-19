@@ -1,0 +1,429 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "batch-workflow-8",
+      "definition_id": "batch-workflow",
+      "parameters": {},
+      "position": {
+        "x": 579.4861471628944,
+        "y": -607.6178983071844
+      },
+      "subworkflows": {
+        "default": {
+          "format": "flowgraph-workflow",
+          "version": 3,
+          "nodes": [
+            {
+              "id": "image-fluency-metrics-1-copy-copy-copy",
+              "definition_id": "image-fluency-metrics",
+              "parameters": {
+                "complexity_rotate": false,
+                "self_similarity_full": false,
+                "symmetry_shift_range": 0.05
+              },
+              "position": {
+                "x": 335.0466002581561,
+                "y": -19.705592478326842
+              }
+            },
+            {
+              "id": "read-image-2-copy-copy-copy",
+              "definition_id": "read-image",
+              "parameters": {
+                "path": "/tmp/flowgraph-user-data/Label 8.png"
+              },
+              "position": {
+                "x": -257.20315492037935,
+                "y": -19.675452733372367
+              }
+            },
+            {
+              "id": "workflow-input-8-copy-copy",
+              "definition_id": "workflow-input",
+              "parameters": {
+                "name": "file_path"
+              },
+              "position": {
+                "x": -1099.522367220436,
+                "y": -11.281995638651109
+              }
+            },
+            {
+              "id": "workflow-output-9-copy-copy",
+              "definition_id": "workflow-output",
+              "parameters": {
+                "name": "Constrast"
+              },
+              "position": {
+                "x": 990.4871269577495,
+                "y": -17.1509899452545
+              }
+            },
+            {
+              "id": "workflow-output-10-copy-copy",
+              "definition_id": "workflow-output",
+              "parameters": {
+                "name": "Complexity"
+              },
+              "position": {
+                "x": 993.1828353495333,
+                "y": 109.87859638922887
+              }
+            },
+            {
+              "id": "workflow-output-11-copy-copy",
+              "definition_id": "workflow-output",
+              "parameters": {
+                "name": "Symmetry"
+              },
+              "position": {
+                "x": 988.1248214524505,
+                "y": 369.81075415501215
+              }
+            },
+            {
+              "id": "workflow-output-12-copy-copy",
+              "definition_id": "workflow-output",
+              "parameters": {
+                "name": "Self-Similarity"
+              },
+              "position": {
+                "x": 991.8124131329861,
+                "y": 239.04574665808605
+              }
+            },
+            {
+              "id": "set-string-13",
+              "definition_id": "set-string",
+              "parameters": {
+                "value": ""
+              },
+              "position": {
+                "x": -841.8607570660295,
+                "y": -16.857160488995014
+              }
+            },
+            {
+              "id": "paragraph-doc-12",
+              "definition_id": "paragraph-doc",
+              "parameters": {
+                "text": "# Workflow Input\n\nInput ports promoted to the parent workflow are defined by this type of Node.\n\nOpen the Node to define a custom name.\n"
+              },
+              "position": {
+                "x": -1154.4961564967139,
+                "y": -175.26681265021054
+              }
+            },
+            {
+              "id": "paragraph-doc-13",
+              "definition_id": "paragraph-doc",
+              "parameters": {
+                "text": "# Workflow Output\n\nOutput ports promoted to the parent workflow are defined by this type of Node.\n\nOpen the Node to define a custom name.\n\nAs you can see, not all outputs are exported.\n"
+              },
+              "position": {
+                "x": 927.4813985348,
+                "y": -207.27887839263272
+              }
+            },
+            {
+              "id": "paragraph-doc-14",
+              "definition_id": "paragraph-doc",
+              "parameters": {
+                "text": "# String Input\n\nThis Box converts a string into a path.\n\nThis allows us to promote a vector of text values to the parent workflow.\n"
+              },
+              "position": {
+                "x": -720.8483619598625,
+                "y": -178.51269732995445
+              }
+            },
+            {
+              "id": "paragraph-doc-14-copy",
+              "definition_id": "paragraph-doc",
+              "parameters": {
+                "text": "# Read Image\n\nThis Node uses the input port as the file path and reads the image from disk.\n\n\n"
+              },
+              "position": {
+                "x": -162.55615363997913,
+                "y": -180.42762004575198
+              }
+            },
+            {
+              "id": "paragraph-doc-14-copy-copy",
+              "definition_id": "paragraph-doc",
+              "parameters": {
+                "text": "# Image Fluency Metrics\n\nThis Node is the core of the algorithm. It computes the different metrics for an image.\n\n\n"
+              },
+              "position": {
+                "x": 461.91629493314025,
+                "y": -186.3182596499412
+              }
+            }
+          ],
+          "inputs": [
+            {
+              "name": "file_path",
+              "node_id": "workflow-input-8-copy-copy",
+              "node_port": "value"
+            }
+          ],
+          "outputs": [
+            {
+              "name": "Symmetry",
+              "node_id": "workflow-output-11-copy-copy",
+              "node_port": "value"
+            },
+            {
+              "name": "Constrast",
+              "node_id": "workflow-output-9-copy-copy",
+              "node_port": "value"
+            },
+            {
+              "name": "Complexity",
+              "node_id": "workflow-output-10-copy-copy",
+              "node_port": "value"
+            },
+            {
+              "name": "Self-Similarity",
+              "node_id": "workflow-output-12-copy-copy",
+              "node_port": "value"
+            }
+          ],
+          "edges": [
+            {
+              "source_node": "read-image-2-copy-copy-copy",
+              "source_port": "image",
+              "target_node": "image-fluency-metrics-1-copy-copy-copy",
+              "target_port": "image"
+            },
+            {
+              "source_node": "image-fluency-metrics-1-copy-copy-copy",
+              "source_port": "contrast",
+              "target_node": "workflow-output-9-copy-copy",
+              "target_port": "value"
+            },
+            {
+              "source_node": "image-fluency-metrics-1-copy-copy-copy",
+              "source_port": "complexity",
+              "target_node": "workflow-output-10-copy-copy",
+              "target_port": "value"
+            },
+            {
+              "source_node": "image-fluency-metrics-1-copy-copy-copy",
+              "source_port": "self_similarity",
+              "target_node": "workflow-output-12-copy-copy",
+              "target_port": "value"
+            },
+            {
+              "source_node": "image-fluency-metrics-1-copy-copy-copy",
+              "source_port": "symmetry_horizontal",
+              "target_node": "workflow-output-11-copy-copy",
+              "target_port": "value"
+            },
+            {
+              "source_node": "workflow-input-8-copy-copy",
+              "source_port": "value",
+              "target_node": "set-string-13",
+              "target_port": "value"
+            },
+            {
+              "source_node": "set-string-13",
+              "source_port": "value",
+              "target_node": "read-image-2-copy-copy-copy",
+              "target_port": "path"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "read-files_names",
+      "definition_id": "read-directory-files",
+      "parameters": {
+        "patterns": "",
+        "path": "/tmp/flowgraph-user-data/",
+        "include_pattern": "\\.jpg"
+      },
+      "position": {
+        "x": -18.355699580845055,
+        "y": -626.6559004260448
+      }
+    },
+    {
+      "id": "aggregate-lists-to-table-4",
+      "definition_id": "aggregate-lists-to-table",
+      "parameters": {},
+      "position": {
+        "x": 1226.8388759138318,
+        "y": -583.0737855785558
+      }
+    },
+    {
+      "id": "write-table-4",
+      "definition_id": "write-table",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/output_pandas.xlsx",
+        "sheet_name": "Sheet1",
+        "header": true
+      },
+      "position": {
+        "x": 1908.685197261008,
+        "y": -282.8728509173744
+      }
+    },
+    {
+      "id": "plot-table-5",
+      "definition_id": "plot-table",
+      "parameters": {},
+      "position": {
+        "x": 1870.134236630808,
+        "y": -922.356029726379
+      }
+    },
+    {
+      "id": "title-doc-6",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "FlowGraph Workflow for the computaion of Image Fluency Metric"
+      },
+      "position": {
+        "x": 889.3006265061895,
+        "y": -1087.8424169768482
+      }
+    },
+    {
+      "id": "paragraph-doc-7",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Read Directory Files\n\n**Before running this demo**, choose **Demos → Add demo files to temporary user files** to load the bundled sample images into `/tmp/flowgraph-user-data`. Then click **Run workflow**. Temporary user files are session data, so add the demo files again in each new session.\n\nThis Node is used to read all files in a directory.\n\nYou can open the Box to specify include and exclude patterns.\n\nThe path is preconfigured to use local files. Select, drop, or mount a directory so the editor can access the files.\n"
+      },
+      "position": {
+        "x": 85.72977545703381,
+        "y": -992.9311310666363
+      }
+    },
+    {
+      "id": "paragraph-doc-8",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Batch Workflow\n\nThis Node executes the nested workflow for each entry in the input vector.\n\nClick **Edit nested workflow** to open and review the nested workflow.\n"
+      },
+      "position": {
+        "x": 675.7180880883732,
+        "y": -819.6305666865544
+      }
+    },
+    {
+      "id": "paragraph-doc-9",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Aggregate Lists into a Table\n\nThe Batch Workflow produces multiple vector outputs. This Node aggregates them into a single table.\n"
+      },
+      "position": {
+        "x": 1284.9210292962784,
+        "y": -813.8501753156892
+      }
+    },
+    {
+      "id": "paragraph-doc-9-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Write Table\n\nThis Node export the table to a file.\nYou can change the name and path of the exported file using the \"˅\" icon."
+      },
+      "position": {
+        "x": 2557.303891039811,
+        "y": -231.2485786653425
+      }
+    },
+    {
+      "id": "paragraph-doc-11",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Plot Table\n\nThis is a minimalist Node for visualizing tables. It is primarily intended to help workflow designers inspect data and debug workflows during execution.\n\nThis Node is a Sink, which means that it consumes the input data and does not produce any downstream output.\n\nWhen the workflow is executed from the command line, this Node acts as a no-op."
+      },
+      "position": {
+        "x": 2544.224212775002,
+        "y": -814.7384500182355
+      }
+    },
+    {
+      "id": "show-value-12",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1922.1537931487744,
+        "y": 38.13516816412884
+      }
+    },
+    {
+      "id": "paragraph-doc-9-copy-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Show Value\n\nThis node show the table.\n"
+      },
+      "position": {
+        "x": 2555.6137643557568,
+        "y": 48.95027539105145
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "read-files_names",
+      "source_port": "files",
+      "target_node": "aggregate-lists-to-table-4",
+      "target_port": "column_1"
+    },
+    {
+      "source_node": "aggregate-lists-to-table-4",
+      "source_port": "table",
+      "target_node": "write-table-4",
+      "target_port": "data"
+    },
+    {
+      "source_node": "aggregate-lists-to-table-4",
+      "source_port": "table",
+      "target_node": "plot-table-5",
+      "target_port": "table"
+    },
+    {
+      "source_node": "read-files_names",
+      "source_port": "files_full_paths",
+      "target_node": "batch-workflow-8",
+      "target_port": "file_path"
+    },
+    {
+      "source_node": "aggregate-lists-to-table-4",
+      "source_port": "table",
+      "target_node": "show-value-12",
+      "target_port": "value"
+    },
+    {
+      "source_node": "batch-workflow-8",
+      "source_port": "Symmetry",
+      "target_node": "aggregate-lists-to-table-4",
+      "target_port": "column_2"
+    },
+    {
+      "source_node": "batch-workflow-8",
+      "source_port": "Constrast",
+      "target_node": "aggregate-lists-to-table-4",
+      "target_port": "column_3"
+    },
+    {
+      "source_node": "batch-workflow-8",
+      "source_port": "Complexity",
+      "target_node": "aggregate-lists-to-table-4",
+      "target_port": "column_4"
+    },
+    {
+      "source_node": "batch-workflow-8",
+      "source_port": "Self-Similarity",
+      "target_node": "aggregate-lists-to-table-4",
+      "target_port": "column_5"
+    }
+  ]
+}

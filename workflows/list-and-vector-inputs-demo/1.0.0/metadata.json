@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "list-and-vector-inputs-demo/1.0.0",
+  "workflow_name": "List and Vector Inputs (Demo)",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# List and Vector Inputs\r\n\r\nThis workflow demonstrates how to define typed lists and fixed-component vectors. Six independent input nodes each connect to a **Show Value** node, allowing you to inspect their values directly without additional processing or type conversion.\r\n\r\n## How it works\r\n\r\n### 1. Define lists\r\n\r\nThe left side of the workflow demonstrates three list types. Lists contain a variable number of values of a single type.\r\n\r\n| List type | Default values |\r\n|---|---|\r\n| Text | `[\"alpha\", \"beta\", \"gamma\"]` |\r\n| Integers | `[1, 2, 3, 5, 8]` |\r\n| Floats | `[-1.5, 0.0, 2.5, 3.75]` |\r\n\r\nEach list is passed as a complete collection to its connected **Show Value** node.\r\n\r\n### 2. Define vectors\r\n\r\nThe right side demonstrates three vector inputs. Unlike lists, vectors have a fixed set of named components: **X** and **Y** for 2D vectors, plus **Z** for 3D vectors.\r\n\r\n| Vector type | Default components |\r\n|---|---|\r\n| 2D floating-point vector | X = `1.5`, Y = `-2.5` |\r\n| 2D integer vector | X = `3`, Y = `4` |\r\n| 3D floating-point vector | X = `1.0`, Y = `2.0`, Z = `3.0` |\r\n\r\nEach input combines its components into a single vector value, which is displayed by its connected **Show Value** node.\r\n\r\n### 3. Inspect the outputs\r\n\r\nAll six connections are direct and require no type conversion. The workflow displays the configured lists and vectors without modifying them.\r\n\r\n## Try it\r\n\r\n1. Choose **View → Show All Node Details** to expand the input parameters.\r\n2. Click **Run workflow** to display the default lists and vectors.\r\n3. Edit list entries or change the number of entries, keeping values consistent with the list’s type.\r\n4. Change individual vector components.\r\n5. Run the workflow again and compare the updated outputs.\r\n\r\nNo files, external downloads, or custom code are required.\r\n\r\n> **Note:** Use a list for a variable-length collection of values of one type. Use a vector when you need a fixed set of components, such as 2D or 3D coordinates.",
+  "uploaded_at": "2026-11-02T10:23:02Z",
+  "json_filename": "Lists_and_Vectors.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "6"
+  }
+}

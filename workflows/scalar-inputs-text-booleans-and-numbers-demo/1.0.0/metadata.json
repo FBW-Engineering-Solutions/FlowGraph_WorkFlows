@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "scalar-inputs-text-booleans-and-numbers-demo/1.0.0",
+  "workflow_name": "# Scalar Inputs: Text, Booleans, and Numbers (Demo)",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Scalar Inputs: Text, Booleans, and Numbers\r\n\r\nThis workflow demonstrates how to define scalar values and connect them to other nodes. It displays a text value directly and combines a Boolean, a floating-point number, and an integer into a **3D vector**, illustrating both direct connections and connections that require type conversion.\r\n\r\n## How it works\r\n\r\n### 1. Define scalar inputs\r\n\r\nFour input nodes provide the starting values:\r\n\r\n| Input type | Default value | Destination |\r\n|---|---|---|\r\n| Text | `\"Label Text\"` | **Show Value** |\r\n| Boolean | `true` | Vector component **X** |\r\n| Float | `3.14159` | Vector component **Y** |\r\n| Integer Slider | `19`, with a range of `0–42` | Vector component **Z** |\r\n\r\nThe text input connects directly to a **Show Value** node, which displays `Label Text`.\r\n\r\n### 2. Build a 3D vector\r\n\r\nThe **3D Vector Input** node receives the three connected scalar values. Its components require floating-point numbers:\r\n\r\n- **X:** The Boolean value `true` converts to `1.0`.\r\n- **Y:** The float value `3.14159` is used directly.\r\n- **Z:** The integer slider value `19` converts to `19.0`.\r\n\r\nWith the default inputs, the resulting vector has components **(1.0, 3.14159, 19.0)**. A second **Show Value** node displays the vector.\r\n\r\n### 3. Understand connection colors\r\n\r\nThe workflow includes an explanation of the connection arrows:\r\n\r\n- **Blue arrows** indicate direct connections.\r\n- **Orange arrows** indicate connections that require type conversion, which can involve data loss depending on the types and values.\r\n\r\nThe Boolean-to-float and integer-to-float connections demonstrate conversion, while the float-to-float connection is direct.\r\n\r\n## Try it\r\n\r\n1. Choose **View → Show All Node Details** to inspect the input parameters.\r\n2. Click **Run workflow** to display the text and assembled vector.\r\n3. Edit the text input and run again to update its displayed value.\r\n4. Toggle the Boolean to change the vector’s **X** component between `1.0` and `0.0`.\r\n5. Change the float value to update **Y**, or adjust the integer slider to update **Z**.\r\n6. Run the workflow again and compare the results.\r\n\r\nNo files, external downloads, or custom code are required.\r\n\r\n> **Note:** Connected inputs supply the vector’s component values during execution, replacing the node’s configured component defaults.",
+  "uploaded_at": "2026-11-02T10:25:32Z",
+  "json_filename": "Scalar_Inputs.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "7"
+  }
+}

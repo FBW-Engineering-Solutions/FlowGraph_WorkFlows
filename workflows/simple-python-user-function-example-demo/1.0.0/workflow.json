@@ -1,0 +1,117 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "function-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "User Function: rectangle area and perimeter"
+      },
+      "position": {
+        "x": 116.15639965109591,
+        "y": 9.373095341673352
+      }
+    },
+    {
+      "id": "function-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Run and experiment\n\n1. Choose **View → Show All Node Details** to inspect the inputs and Python code.\n2. Click **Run workflow**. With width **3.0** and height **4.0**, the upper **Show Value** displays area **12.0**, and the lower one displays perimeter **14.0**.\n3. Change either input and run again. No files or additional packages are needed.\n\n## How the ports are defined\n\nThe User Function node runs Python code defining `Execute`. The typed arguments `width: float` and `height: float` create matching input ports. The return annotation `tuple[float, float]` creates `output1` (area) and `output2` (perimeter), in that order. Return a tuple with the same number and types of values as the annotation.\n\nEdit the code to try another calculation while keeping the signature and connections. Only run code you trust."
+      },
+      "position": {
+        "x": 40,
+        "y": 540
+      }
+    },
+    {
+      "id": "width",
+      "definition_id": "set-float",
+      "parameters": {
+        "value": 3
+      },
+      "position": {
+        "x": 40,
+        "y": 160
+      }
+    },
+    {
+      "id": "height",
+      "definition_id": "set-float",
+      "parameters": {
+        "value": 4
+      },
+      "position": {
+        "x": 40,
+        "y": 340
+      }
+    },
+    {
+      "id": "rectangle",
+      "definition_id": "user-function",
+      "parameters": {
+        "code": [
+          "def Execute(width: float, height: float) -> tuple[float, float]:",
+          "    area = width * height",
+          "    perimeter = 2.0 * (width + height)",
+          "    return (area, perimeter)",
+          ""
+        ]
+      },
+      "position": {
+        "x": 650.63599458728,
+        "y": 226.4952638700947
+      },
+      "size": {
+        "width": 1000,
+        "height": 550
+      }
+    },
+    {
+      "id": "area",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1219.250296386832,
+        "y": 93.39135158466124
+      }
+    },
+    {
+      "id": "perimeter",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 803.0346216280113,
+        "y": 91.98865193272995
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "width",
+      "source_port": "value",
+      "target_node": "rectangle",
+      "target_port": "width"
+    },
+    {
+      "source_node": "height",
+      "source_port": "value",
+      "target_node": "rectangle",
+      "target_port": "height"
+    },
+    {
+      "source_node": "rectangle",
+      "source_port": "output1",
+      "target_node": "area",
+      "target_port": "value"
+    },
+    {
+      "source_node": "rectangle",
+      "source_port": "output2",
+      "target_node": "perimeter",
+      "target_port": "value"
+    }
+  ]
+}

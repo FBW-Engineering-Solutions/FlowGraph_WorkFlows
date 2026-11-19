@@ -1,0 +1,356 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "image-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Color Cardboard: multi-branch image processing"
+      },
+      "position": {
+        "x": 686.6483961368176,
+        "y": -421.48712738341993
+      }
+    },
+    {
+      "id": "image-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Setup and run\n1. Choose **Demos → Add demo files to temporary user files**. Use the temporary folder, not a mounted directory.\n2. Click **Run workflow**. The input is the bundled ColorCardboard.jpg; no upload or external download is needed.\n3. Compare the color, grayscale, and rotated previews, then inspect the five metric values.\n4. Refresh User files and download Cardboard-color.png, Cardboard-gray.png, and Cardboard-rotated.png. Running again overwrites these generated files, not the original JPG.\n\nThis example uses existing Pillow and NumPy nodes; it does not require Fiji or ImageJ."
+      },
+      "position": {
+        "x": 1185.9393119231493,
+        "y": -420.93537142788256
+      }
+    },
+    {
+      "id": "prepare-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 1. Prepare a shared input\nRead the demo image, resize to 320 x 256 pixels, then crop the central region (left=32, top=32, right=288, bottom=224). Every branch starts from the same 256 x 192 crop. Resizing to a fixed size intentionally changes the original aspect ratio and keeps this demo lightweight."
+      },
+      "position": {
+        "x": 1513.9850749226016,
+        "y": -421.7643117965696
+      }
+    },
+    {
+      "id": "branch-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 2. Fan out into three branches\nColor: preserve the prepared RGB crop.\nGrayscale: convert to L mode.\nRotated: rotate the grayscale result 90 degrees with expansion enabled, producing 192 x 256 pixels.\nEach branch feeds both an inline preview and a lossless PNG export."
+      },
+      "position": {
+        "x": 1868.1463494459351,
+        "y": -420.3246389363376
+      }
+    },
+    {
+      "id": "metrics-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 3. Inspect image fluency\nThe grayscale crop also feeds Image Fluency Metrics. The five Show Value nodes display contrast, compression complexity, self-similarity, vertical symmetry, and horizontal symmetry (top to bottom). These are descriptive image measurements, not an overall quality score. Change the crop or source file and rerun to explore the differences."
+      },
+      "position": {
+        "x": 2205.7510281979817,
+        "y": -415.2122688760616
+      }
+    },
+    {
+      "id": "source-file",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/ColorCardboard.jpg"
+      },
+      "position": {
+        "x": 588.7339595944517,
+        "y": -78.67811913952693
+      }
+    },
+    {
+      "id": "read-cardboard",
+      "definition_id": "read-image",
+      "parameters": {
+        "path": ""
+      },
+      "position": {
+        "x": 581.8683168421505,
+        "y": 177.77427364378082
+      }
+    },
+    {
+      "id": "resize-cardboard",
+      "definition_id": "resize-image",
+      "parameters": {
+        "width": 320,
+        "height": 256
+      },
+      "position": {
+        "x": 582.8952698943295,
+        "y": 486.17016181578197
+      }
+    },
+    {
+      "id": "crop-cardboard",
+      "definition_id": "crop-image",
+      "parameters": {
+        "left": 32,
+        "top": 32,
+        "right": 288,
+        "bottom": 224
+      },
+      "position": {
+        "x": 589.5753652931667,
+        "y": 777.5614542100328
+      }
+    },
+    {
+      "id": "grayscale",
+      "definition_id": "convert-image-mode",
+      "parameters": {
+        "mode": "L"
+      },
+      "position": {
+        "x": 1213.338533718262,
+        "y": -10.78010605912744
+      }
+    },
+    {
+      "id": "rotate-gray",
+      "definition_id": "rotate-image",
+      "parameters": {
+        "angle": 90,
+        "expand": true
+      },
+      "position": {
+        "x": 1918.0473198008242,
+        "y": 506.7451537273082
+      }
+    },
+    {
+      "id": "preview-color",
+      "definition_id": "local-view",
+      "parameters": {},
+      "position": {
+        "x": 1404.4953341165274,
+        "y": 751.8909930257882
+      }
+    },
+    {
+      "id": "preview-gray",
+      "definition_id": "local-view",
+      "parameters": {},
+      "position": {
+        "x": 1911.9202872979108,
+        "y": 754.5846872661164
+      }
+    },
+    {
+      "id": "preview-rotated",
+      "definition_id": "local-view",
+      "parameters": {},
+      "position": {
+        "x": 2409.843470692615,
+        "y": 767.237024722007
+      }
+    },
+    {
+      "id": "export-color",
+      "definition_id": "write-image",
+      "parameters": {
+        "filename": "/tmp/flowgraph-user-data/Cardboard-color.png"
+      },
+      "position": {
+        "x": 1262.4824373632596,
+        "y": 237.4663355346056
+      }
+    },
+    {
+      "id": "export-gray",
+      "definition_id": "write-image",
+      "parameters": {
+        "filename": "/tmp/flowgraph-user-data/Cardboard-gray.png"
+      },
+      "position": {
+        "x": 1898.037403266207,
+        "y": -111.49483734551428
+      }
+    },
+    {
+      "id": "export-rotated",
+      "definition_id": "write-image",
+      "parameters": {
+        "filename": "/tmp/flowgraph-user-data/Cardboard-rotated.png"
+      },
+      "position": {
+        "x": 2917.221325437067,
+        "y": 749.7567660190434
+      }
+    },
+    {
+      "id": "gray-metrics",
+      "definition_id": "image-fluency-metrics",
+      "parameters": {
+        "complexity_rotate": false,
+        "self_similarity_full": false,
+        "symmetry_shift_range": 0.05
+      },
+      "position": {
+        "x": 1919.9898549166383,
+        "y": 125.16379280958
+      }
+    },
+    {
+      "id": "metric-contrast",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2872.8914129270192,
+        "y": -13.215810005799138
+      }
+    },
+    {
+      "id": "metric-complexity",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2876.401936513803,
+        "y": 129.33860506851062
+      }
+    },
+    {
+      "id": "metric-self-similarity",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2875.231761984875,
+        "y": 269.5526710849647
+      }
+    },
+    {
+      "id": "metric-vertical-symmetry",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2875.231761984875,
+        "y": 409.76673710141864
+      }
+    },
+    {
+      "id": "metric-horizontal-symmetry",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2874.061587455947,
+        "y": 545.3001050021614
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "source-file",
+      "source_port": "path",
+      "target_node": "read-cardboard",
+      "target_port": "path"
+    },
+    {
+      "source_node": "read-cardboard",
+      "source_port": "image",
+      "target_node": "resize-cardboard",
+      "target_port": "image"
+    },
+    {
+      "source_node": "resize-cardboard",
+      "source_port": "image",
+      "target_node": "crop-cardboard",
+      "target_port": "image"
+    },
+    {
+      "source_node": "crop-cardboard",
+      "source_port": "image",
+      "target_node": "grayscale",
+      "target_port": "image"
+    },
+    {
+      "source_node": "grayscale",
+      "source_port": "image",
+      "target_node": "rotate-gray",
+      "target_port": "image"
+    },
+    {
+      "source_node": "crop-cardboard",
+      "source_port": "image",
+      "target_node": "preview-color",
+      "target_port": "input"
+    },
+    {
+      "source_node": "crop-cardboard",
+      "source_port": "image",
+      "target_node": "export-color",
+      "target_port": "image"
+    },
+    {
+      "source_node": "grayscale",
+      "source_port": "image",
+      "target_node": "preview-gray",
+      "target_port": "input"
+    },
+    {
+      "source_node": "grayscale",
+      "source_port": "image",
+      "target_node": "export-gray",
+      "target_port": "image"
+    },
+    {
+      "source_node": "rotate-gray",
+      "source_port": "image",
+      "target_node": "preview-rotated",
+      "target_port": "input"
+    },
+    {
+      "source_node": "rotate-gray",
+      "source_port": "image",
+      "target_node": "export-rotated",
+      "target_port": "image"
+    },
+    {
+      "source_node": "grayscale",
+      "source_port": "image",
+      "target_node": "gray-metrics",
+      "target_port": "image"
+    },
+    {
+      "source_node": "gray-metrics",
+      "source_port": "contrast",
+      "target_node": "metric-contrast",
+      "target_port": "value"
+    },
+    {
+      "source_node": "gray-metrics",
+      "source_port": "complexity",
+      "target_node": "metric-complexity",
+      "target_port": "value"
+    },
+    {
+      "source_node": "gray-metrics",
+      "source_port": "self_similarity",
+      "target_node": "metric-self-similarity",
+      "target_port": "value"
+    },
+    {
+      "source_node": "gray-metrics",
+      "source_port": "symmetry_vertical",
+      "target_node": "metric-vertical-symmetry",
+      "target_port": "value"
+    },
+    {
+      "source_node": "gray-metrics",
+      "source_port": "symmetry_horizontal",
+      "target_node": "metric-horizontal-symmetry",
+      "target_port": "value"
+    }
+  ]
+}

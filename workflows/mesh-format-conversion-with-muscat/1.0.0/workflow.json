@@ -1,0 +1,131 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "input_path",
+      "definition_id": "set-string",
+      "parameters": {},
+      "position": {
+        "x": -94.41052232504025,
+        "y": -123.07482374968232
+      }
+    },
+    {
+      "id": "output_path",
+      "definition_id": "set-string",
+      "parameters": {},
+      "position": {
+        "x": -95.23102115003812,
+        "y": 41.91971799949171
+      }
+    },
+    {
+      "id": "mesh_loader",
+      "definition_id": "load-muscat",
+      "parameters": {},
+      "position": {
+        "x": 307.49606459853806,
+        "y": -129.4861319672114
+      }
+    },
+    {
+      "id": "mesh_writer",
+      "definition_id": "write-muscat",
+      "parameters": {},
+      "position": {
+        "x": 659.429604227296,
+        "y": 37.52519675663745
+      }
+    },
+    {
+      "id": "input",
+      "definition_id": "workflow-input",
+      "parameters": {
+        "name": "in_filename"
+      },
+      "position": {
+        "x": -346.43132152639555,
+        "y": -90.44522718409169
+      }
+    },
+    {
+      "id": "title-doc-5",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Mesh Converter Muscat >> Muscat"
+      },
+      "position": {
+        "x": -4.6817529886857585,
+        "y": -321.285582053244
+      }
+    },
+    {
+      "id": "paragraph-doc-6",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "Read a mesh file with Muscat and save it with Muscat. "
+      },
+      "position": {
+        "x": -0.7861539053497779,
+        "y": -245.15996619593776
+      }
+    },
+    {
+      "id": "output",
+      "definition_id": "workflow-input",
+      "parameters": {
+        "name": "out_filename"
+      },
+      "position": {
+        "x": -347.4928277846146,
+        "y": 74.76726215442469
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "name": "in_filename",
+      "node_id": "input",
+      "node_port": "value"
+    },
+    {
+      "name": "out_filename",
+      "node_id": "output",
+      "node_port": "value"
+    }
+  ],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "mesh_loader",
+      "source_port": "mesh",
+      "target_node": "mesh_writer",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "input",
+      "source_port": "value",
+      "target_node": "input_path",
+      "target_port": "value"
+    },
+    {
+      "source_node": "input_path",
+      "source_port": "value",
+      "target_node": "mesh_loader",
+      "target_port": "path"
+    },
+    {
+      "source_node": "output",
+      "source_port": "value",
+      "target_node": "output_path",
+      "target_port": "value"
+    },
+    {
+      "source_node": "output_path",
+      "source_port": "value",
+      "target_node": "mesh_writer",
+      "target_port": "path"
+    }
+  ]
+}

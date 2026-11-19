@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "read-and-display-a-mesh/1.0.0",
+  "workflow_name": "Read and Display a Mesh",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Read and Display a Mesh\r\n\r\nThis workflow demonstrates a simple mesh-loading pipeline:\r\n\r\n**Select file → Read Mesh (Muscat) → To 3D View**\r\n\r\nIt loads the bundled `FlowGraph.stl` and displays it with solid coloring and an axis grid. No mesh transformations or exports are performed.\r\n\r\n## Try it\r\n\r\n1. Choose **Demos → Add demo files to temporary user files**.\r\n2. Optionally choose **View → Show All Node Details** to inspect the file path and display options.\r\n3. Click **Run workflow**, then open the **3D View** to inspect the mesh.\r\n\r\nTo use your own mesh, make it available through **User Files** and update the **Select file** path. If the mesh contains a suitable scalar field, select it under **Color field** for field-based coloring.\r\n\r\n> **Requirement:** The execution backend must provide **Muscat**. Temporary demo files must be added again in each new session.",
+  "uploaded_at": "2026-11-02T11:50:37Z",
+  "json_filename": "SimpleReadMesh.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "11"
+  }
+}

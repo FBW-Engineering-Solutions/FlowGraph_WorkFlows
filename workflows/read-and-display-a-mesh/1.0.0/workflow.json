@@ -1,0 +1,90 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "mesh-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Read and display a mesh"
+      },
+      "position": {
+        "x": 426.30581867388366,
+        "y": 482.27334235453316
+      }
+    },
+    {
+      "id": "mesh-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Prepare and run\n\n1. Choose **Demos → Add demo files to temporary user files** to copy the bundled `FlowGraph.stl` into `/tmp/flowgraph-user-data`. Use temporary files, not a mounted local directory, for this example.\n2. Choose **View → Show All Node Details** to inspect the selected file and display options.\n3. Click **Run workflow** to load the STL mesh with **Read Mesh (Muscat)** and display it in the **3D View**. The execution backend must provide Muscat.\n\nTemporary user files are session data; add them again in a new session. To load your own mesh, make it available through **User Files** and update the **Select file** path."
+      },
+      "position": {
+        "x": -7.983761840324746,
+        "y": 758.7280108254397
+      }
+    },
+    {
+      "id": "mesh-pipeline-doc",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## How it works\n\n**Select file → Read Mesh (Muscat) → To 3D View**\n\n**Select file** outputs its configured path as text; it does not read the file contents. Connect it directly to the mesh reader, not to another file-selection node. The reader loads the mesh, and **To 3D View** displays it with solid coloring and an axis grid. Choose an available scalar field in **Color field** if you want field-based coloring."
+      },
+      "position": {
+        "x": 348.90392422192144,
+        "y": 836.1299052774019
+      }
+    },
+    {
+      "id": "file-path",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/FlowGraph.stl"
+      },
+      "position": {
+        "x": -2.3815967523680683,
+        "y": 590.2300405953993
+      }
+    },
+    {
+      "id": "load-muscat",
+      "definition_id": "load-muscat",
+      "parameters": {
+        "path": ""
+      },
+      "position": {
+        "x": 351.6644113667117,
+        "y": 597.3748308525034
+      }
+    },
+    {
+      "id": "mesh-sink_2",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "",
+        "show_axis_grid": true,
+        "show_representation": true
+      },
+      "position": {
+        "x": 725.9539918809202,
+        "y": 598.5656292286874
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "file-path",
+      "source_port": "path",
+      "target_node": "load-muscat",
+      "target_port": "path"
+    },
+    {
+      "source_node": "load-muscat",
+      "source_port": "mesh",
+      "target_node": "mesh-sink_2",
+      "target_port": "mesh"
+    }
+  ]
+}

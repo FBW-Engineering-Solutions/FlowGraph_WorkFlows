@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "select-paths-and-list-directory-files/1.0.0",
+  "workflow_name": "Select Paths and List Directory Files",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# File Inputs: Select Paths and List Directory Files\r\n\r\nThis workflow demonstrates how to select individual file paths and list files in a directory using regular-expression filters. Each output connects to a **Show Value** node so you can inspect the selected paths and file lists.\r\n\r\nThe example uses bundled demo files in the temporary user-files directory and requires no network access.\r\n\r\n## How it works\r\n\r\n### 1. Select individual files\r\n\r\nTwo nodes demonstrate file-path selection:\r\n\r\n| Node | Selected file | Output |\r\n|---|---|---|\r\n| **Select file** | `SpherePoints.csv` | `/tmp/flowgraph-user-data/SpherePoints.csv` |\r\n| **Select uploaded file** | `ColorCardboard.jpg` | `/tmp/flowgraph-user-data/ColorCardboard.jpg` |\r\n\r\nBoth nodes return a **path as text**, not the contents of the file. Their connected **Show Value** nodes display those paths.\r\n\r\nTo load the actual data, connect a selected path to a compatible reader node.\r\n\r\n### 2. List and filter directory files\r\n\r\nThe **Read Directory Files** node lists immediate files in `/tmp/flowgraph-user-data` using these filters:\r\n\r\n| Filter | Expression | Effect |\r\n|---|---|---|\r\n| Include | `\\.(csv\\|jpg)$` | Keep file names ending in `.csv` or `.jpg` |\r\n| Exclude | `^Color` | Remove file names beginning with `Color` |\r\n\r\nThe node provides two outputs:\r\n\r\n- **File names**, without the directory prefix.\r\n- **Full file paths**, suitable for passing to reader nodes or batch workflows.\r\n\r\nWith only the bundled demo files present, the filters exclude `ColorCardboard.jpg`, leaving:\r\n\r\n- File name: `SpherePoints.csv`\r\n- Full path: `/tmp/flowgraph-user-data/SpherePoints.csv`\r\n\r\n> **Note:** The filters are regular expressions, not wildcard patterns.\r\n\r\n## Try it\r\n\r\n1. Choose **Demos → Add demo files to temporary user files**. Use temporary files rather than a mounted local directory for this example.\r\n2. Choose **View → Show All Node Details** to inspect the configured paths and filters.\r\n3. Click **Run workflow** and inspect the four **Show Value** outputs.\r\n4. Clear the exclude expression to include `ColorCardboard.jpg` in the directory results.\r\n5. Clear both filter expressions to list all files in the directory.\r\n6. Upload your own files through **User Files**, then select their paths or adjust the directory filters.\r\n\r\n> **Note:** These nodes select paths or list directory entries; they do not read file contents. Temporary user files are session data, so add the demo files again in each new session.",
+  "uploaded_at": "2026-11-02T10:13:32Z",
+  "json_filename": "Files.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "5"
+  }
+}

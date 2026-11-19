@@ -1,0 +1,207 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "paragraph-doc-1",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# List, array, and vector inputs\n\nLists contain a variable number of values of one type: text or integers. The 1D Array Input accepts numeric values and outputs a one-dimensional NumPy array of floats. Vectors have fixed components: X and Y for 2D, plus Z for 3D.\n\nEdit the input values, then run the workflow to see each result in its connected Show Value node.\n\nThe left column demonstrates two lists and a 1D array; the right column demonstrates vectors. All connections are direct and require no conversion."
+      },
+      "position": {
+        "x": 900.0907644172117,
+        "y": -305.26642256651405
+      }
+    },
+    {
+      "id": "string-list",
+      "definition_id": "set-list[str]",
+      "parameters": {
+        "value": [
+          "alpha",
+          "beta",
+          "gamma"
+        ]
+      },
+      "position": {
+        "x": 0,
+        "y": 40
+      }
+    },
+    {
+      "id": "show-string-list",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 576.3320503327611,
+        "y": 42.84167794316646
+      }
+    },
+    {
+      "id": "integer-list",
+      "definition_id": "set-list[int]",
+      "parameters": {
+        "value": [
+          1,
+          2,
+          3,
+          5,
+          8
+        ]
+      },
+      "position": {
+        "x": 0,
+        "y": 320
+      }
+    },
+    {
+      "id": "show-integer-list",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 573.9648173207036,
+        "y": 320.94722598105545
+      }
+    },
+    {
+      "id": "float-list",
+      "definition_id": "set-array-1d",
+      "parameters": {
+        "value": [
+          -1.5,
+          0,
+          2.5,
+          3.75
+        ]
+      },
+      "position": {
+        "x": 0,
+        "y": 600
+      }
+    },
+    {
+      "id": "show-float-list",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 573.9648173207036,
+        "y": 600.9472259810555
+      }
+    },
+    {
+      "id": "vector-2d",
+      "definition_id": "set-vec2d",
+      "parameters": {
+        "x": 1.5,
+        "y": -2.5
+      },
+      "position": {
+        "x": 902.7051709600952,
+        "y": 42.81837195812081
+      }
+    },
+    {
+      "id": "show-vector-2d",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1529.0933694181329,
+        "y": 41.89445196211091
+      }
+    },
+    {
+      "id": "integer-vector-2d",
+      "definition_id": "set-vec2di",
+      "parameters": {
+        "x": 3,
+        "y": 4
+      },
+      "position": {
+        "x": 897.2182520654873,
+        "y": 319.00183362807667
+      }
+    },
+    {
+      "id": "show-integer-vector-2d",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1529.0933694181329,
+        "y": 321.8944519621109
+      }
+    },
+    {
+      "id": "vector-3d",
+      "definition_id": "set-vec3d",
+      "parameters": {
+        "x": 1,
+        "y": 2,
+        "z": 3
+      },
+      "position": {
+        "x": 889.769959404601,
+        "y": 599.0527740189445
+      }
+    },
+    {
+      "id": "show-vector-3d",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1529.0933694181329,
+        "y": 601.8944519621109
+      }
+    },
+    {
+      "id": "paragraph-doc-14",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "Use the **View** -> **Show All Node Details** to expand the parameters of all the nodes in the workflow"
+      },
+      "position": {
+        "x": 23.369614461575054,
+        "y": -257.14461837894555
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "string-list",
+      "source_port": "value",
+      "target_node": "show-string-list",
+      "target_port": "value"
+    },
+    {
+      "source_node": "integer-list",
+      "source_port": "value",
+      "target_node": "show-integer-list",
+      "target_port": "value"
+    },
+    {
+      "source_node": "float-list",
+      "source_port": "value",
+      "target_node": "show-float-list",
+      "target_port": "value"
+    },
+    {
+      "source_node": "vector-2d",
+      "source_port": "value",
+      "target_node": "show-vector-2d",
+      "target_port": "value"
+    },
+    {
+      "source_node": "integer-vector-2d",
+      "source_port": "value",
+      "target_node": "show-integer-vector-2d",
+      "target_port": "value"
+    },
+    {
+      "source_node": "vector-3d",
+      "source_port": "value",
+      "target_node": "show-vector-3d",
+      "target_port": "value"
+    }
+  ]
+}

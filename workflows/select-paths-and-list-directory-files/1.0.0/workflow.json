@@ -1,0 +1,160 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "files-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "File inputs: select paths and list directory files"
+      },
+      "position": {
+        "x": 54,
+        "y": 116
+      }
+    },
+    {
+      "id": "files-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Prepare and run\n\n1. Choose **Demos → Add demo files to temporary user files**. This copies the bundled sample files into `/tmp/flowgraph-user-data` for this session. Use temporary files, not a mounted local directory, for this example.\n2. Choose **View → Show All Node Details** to inspect the configured paths and filters.\n3. Click **Run workflow** to display the results in the connected **Show Value** nodes.\n\nThese nodes select paths or list directory entries; they do not read the file contents. Connect a reader node to load the selected data."
+      },
+      "position": {
+        "x": -328,
+        "y": 117
+      }
+    },
+    {
+      "id": "select-csv",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/SpherePoints.csv"
+      },
+      "position": {
+        "x": 0,
+        "y": 420
+      }
+    },
+    {
+      "id": "show-csv-path",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 620,
+        "y": 420
+      }
+    },
+    {
+      "id": "select-uploaded-image",
+      "definition_id": "select-server-file",
+      "parameters": {
+        "file name": "/tmp/flowgraph-user-data/ColorCardboard.jpg"
+      },
+      "position": {
+        "x": 0,
+        "y": 660
+      }
+    },
+    {
+      "id": "show-uploaded-path",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 620,
+        "y": 660
+      }
+    },
+    {
+      "id": "list-demo-files",
+      "definition_id": "read-directory-files",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data",
+        "include_pattern": "\\.(csv|jpg)$",
+        "exclude_pattern": "^Color"
+      },
+      "position": {
+        "x": 0,
+        "y": 900
+      }
+    },
+    {
+      "id": "show-filenames",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 620,
+        "y": 900
+      }
+    },
+    {
+      "id": "show-full-paths",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 619,
+        "y": 1043
+      }
+    },
+    {
+      "id": "files-instructions-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "**Select file** returns the configured path to `SpherePoints.csv`. **Select uploaded file** uses `ColorCardboard.jpg` from User Files. Both output a path as text; they do not read the file contents. Connect their output to a compatible reader when you want to load data. You can upload your own files through User Files and select their paths instead.\n"
+      },
+      "position": {
+        "x": -328,
+        "y": 480.5281090289608
+      }
+    },
+    {
+      "id": "files-instructions-copy-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "**Read Directory Files** lists immediate files in the temporary directory. The include expression `\\.(csv|jpg)$` keeps CSV and JPEG files; the exclude expression `^Color` removes `ColorCardboard.jpg`. With only the bundled demo files present, both outputs contain just `SpherePoints.csv`: one as a filename, the other as a full path. Clear the exclude expression to include the image, or clear both expressions to list all files. These filters are regular expressions, not wildcard patterns.\n\n"
+      },
+      "position": {
+        "x": -343,
+        "y": 897
+      }
+    },
+    {
+      "id": "files-instructions-copy-copy-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "**Download URL**, also in Inputs → Files, downloads an HTTP(S) resource and returns its temporary local path. It is not used here so this demo needs no network access. Temporary user files are session data; add them again in a new session."
+      },
+      "position": {
+        "x": 101,
+        "y": 247
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "select-csv",
+      "source_port": "path",
+      "target_node": "show-csv-path",
+      "target_port": "value"
+    },
+    {
+      "source_node": "select-uploaded-image",
+      "source_port": "path",
+      "target_node": "show-uploaded-path",
+      "target_port": "value"
+    },
+    {
+      "source_node": "list-demo-files",
+      "source_port": "files",
+      "target_node": "show-filenames",
+      "target_port": "value"
+    },
+    {
+      "source_node": "list-demo-files",
+      "source_port": "files_full_paths",
+      "target_node": "show-full-paths",
+      "target_port": "value"
+    }
+  ]
+}
