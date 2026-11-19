@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "mesh-format-conversion-with-muscat/1.0.0",
+  "workflow_name": "Mesh Format Conversion with Muscat",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering solutions",
+  "version": "1.0.0",
+  "description": "This workflow reads and writes mesh files using **Muscat**, providing a simple, reusable pipeline for converting between formats supported by Muscat’s readers and writers. It accepts source and destination filenames and passes the loaded mesh directly to the writer without additional mesh-processing steps.\r\n\r\n### How it works\r\n\r\n1. **Specify the files**  \r\n   The workflow inputs `in_filename` and `out_filename` supply the source and destination paths. Each passes through a **Set String** node before reaching the corresponding reader or writer.\r\n\r\n2. **Read the mesh with Muscat**  \r\n   The **Read Mesh (Muscat)** node loads the source file into FlowGraph’s canonical mesh document.\r\n\r\n3. **Write the mesh with Muscat**  \r\n   The **Write Mesh (Muscat)** node saves the mesh using Muscat’s extension-aware universal writer. The destination filename extension determines the output format.\r\n\r\n### Inputs and result\r\n\r\nThe result is a **mesh file written to disk**; the workflow does not expose any output ports. It contains no explicit geometry modification, filtering, or remeshing operations. Preservation of mesh data depends on the capabilities of the source and destination formats.",
+  "uploaded_at": "2026-10-31T22:14:52Z",
+  "json_filename": "SingleMeshConvert.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "1"
+  }
+}

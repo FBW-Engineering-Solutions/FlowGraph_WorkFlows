@@ -1,0 +1,147 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "load-plaid-dataset-1-copy",
+      "definition_id": "load-plaid-dataset",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/plaidDatasets/Tensile2Dstracted"
+      },
+      "position": {
+        "x": 327.2713638099345,
+        "y": 326.98146614529946
+      }
+    },
+    {
+      "id": "extract-plaid-sample-2-copy",
+      "definition_id": "extract-plaid-sample",
+      "parameters": {
+        "split": "train",
+        "sample_number": 0
+      },
+      "position": {
+        "x": 961.4162413893539,
+        "y": 317.1153089153764
+      }
+    },
+    {
+      "id": "extract-plaid-time-step-3-copy",
+      "definition_id": "extract-plaid-time-step",
+      "parameters": {
+        "time": 0
+      },
+      "position": {
+        "x": 1602.5762595652873,
+        "y": 328.4609506499112
+      }
+    },
+    {
+      "id": "mesh-sink-4-copy",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "sig22",
+        "show_representation": true,
+        "show_axis_grid": true
+      },
+      "position": {
+        "x": 936.6396451863434,
+        "y": 729.4608081441135
+      }
+    },
+    {
+      "id": "title-doc-5",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "1) Select the database to read"
+      },
+      "position": {
+        "x": 512.3382851949734,
+        "y": 204.62273670783642
+      }
+    },
+    {
+      "id": "title-doc-6",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "2) Select split and sample number"
+      },
+      "position": {
+        "x": 1112.025890394262,
+        "y": 209.21753012782452
+      }
+    },
+    {
+      "id": "title-doc-7",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "3) Select the time step"
+      },
+      "position": {
+        "x": 1787.5275870233545,
+        "y": 201.1766416428453
+      }
+    },
+    {
+      "id": "title-doc-7-copy",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "4) Change visualization parameters"
+      },
+      "position": {
+        "x": 1142.4721279650505,
+        "y": 636.9182230300414
+      }
+    },
+    {
+      "id": "title-doc-5-copy",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Inspect a plaid Dataset"
+      },
+      "position": {
+        "x": 1112.6059707351274,
+        "y": 113.11177315139365
+      }
+    },
+    {
+      "id": "paragraph-doc-10",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "If your dataset does **not** use the CGNS backend you need to run a local Python Backend. \n\nwith uvx for pypi packages\n\n```\nuvx --with pyplaid flowgraph serve --workspace parent/directory/of/the/dataset\n```\n\nAnd connect this workflow using the \nMenu:\n Run -> Python Backend..."
+      },
+      "position": {
+        "x": 324.0781301341364,
+        "y": 663.314452233587
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "load-plaid-dataset-1-copy",
+      "source_port": "dataset",
+      "target_node": "extract-plaid-sample-2-copy",
+      "target_port": "dataset"
+    },
+    {
+      "source_node": "load-plaid-dataset-1-copy",
+      "source_port": "infos",
+      "target_node": "extract-plaid-sample-2-copy",
+      "target_port": "infos"
+    },
+    {
+      "source_node": "extract-plaid-sample-2-copy",
+      "source_port": "sample",
+      "target_node": "extract-plaid-time-step-3-copy",
+      "target_port": "sample"
+    },
+    {
+      "source_node": "extract-plaid-time-step-3-copy",
+      "source_port": "mesh",
+      "target_node": "mesh-sink-4-copy",
+      "target_port": "mesh"
+    }
+  ]
+}

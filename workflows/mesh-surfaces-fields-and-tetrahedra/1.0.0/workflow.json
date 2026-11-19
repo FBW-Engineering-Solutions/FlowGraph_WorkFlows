@@ -1,0 +1,598 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "mesh-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Mesh laboratory: surfaces, fields, and tetrahedra"
+      },
+      "position": {
+        "x": 0,
+        "y": -620
+      }
+    },
+    {
+      "id": "mesh-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Setup and run\n1. Choose **Demos → Add demo files to temporary user files**. Use the temporary folder rather than a mounted directory.\n2. Click **Run workflow** and open the 3D view. Four mesh sinks show the original STL, shifted STL, shifted XDMF surface, and a tetrahedral sphere.\n3. Refresh User files and download Demo-STL-shifted.xdmf, Demo-XDMF-surface.xdmf, Demo-Sphere-volume.xdmf, and Demo-Sphere-fields.xlsx. Rerunning overwrites these outputs, never the bundled inputs.\n\nKeep FlowGraph.xdmf and FlowGraph.h5 together: the XDMF references the HDF5 companion by filename. This workflow uses existing nodes only; no custom scripts or external remesher is needed.\n\nEach exported XDMF also creates a companion HDF5 file (for example Demo-STL-shifted0.h5). Download both files and keep them together. Exports use the Muscat writer to retain node and cell fields."
+      },
+      "position": {
+        "x": 0,
+        "y": -534.5342126957955
+      }
+    },
+    {
+      "id": "surface-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 1. STL: branch without modifying the source\nFlowGraph.stl feeds an original solid-color view and a transformed copy. The copy is moved +3 along Y and exported as XDMF/HDF5. Apply Transform uses inverse=true so the configured translation acts as a positive world-space offset. Vector fields are transformed too."
+      },
+      "position": {
+        "x": -462.6494229183819,
+        "y": 133.20692497938865
+      }
+    },
+    {
+      "id": "field-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 2. XDMF: select, tag, and retain fields\nRead FlowGraph.xdmf with FlowGraph.h5 beside it. An Element Selector chooses dimension 2 (existing surface elements; it does not compute a volume boundary). Create Tag labels them demo_surface, then Filter Mesh extracts that tag. Move the result -3 along Y, color by RegionId, and export it with its fields. The STL and XDMF are separate sample meshes, not identical discretizations.\n\nExported field values are preserved. The current Muscat XDMF reader flattens multi-component normal arrays when reloading; this demo colors by scalar fields instead."
+      },
+      "position": {
+        "x": -463.86449670459604,
+        "y": 654.6719187995467
+      }
+    },
+    {
+      "id": "sphere-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## 3. CSV: points to a tetrahedral volume\nRead SpherePoints.csv and explicitly map Points_0, Points_1, Points_2 to XYZ. Delaunay 3D fills the point cloud convex hull with tetrahedra; it is not a constrained or quality-controlled mesher. Move the sphere to [4, 6, 0], color by Points_2, and export XDMF/HDF5. Mesh to Table copies the three stored coordinate fields and the engine-generated node IDs to a preview and Excel workbook. These fields remain the original CSV values, not the translated geometry coordinates. This spreadsheet branch needs pandas and openpyxl."
+      },
+      "position": {
+        "x": -422.6480552914684,
+        "y": 1512.8813844727383
+      }
+    },
+    {
+      "id": "stl-file",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/FlowGraph.stl"
+      },
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "read-stl",
+      "definition_id": "load-muscat",
+      "parameters": {
+        "path": ""
+      },
+      "position": {
+        "x": 635.014498738096,
+        "y": -97.15630480640486
+      }
+    },
+    {
+      "id": "xdmf-file",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/FlowGraph.xdmf"
+      },
+      "position": {
+        "x": 0,
+        "y": 650
+      }
+    },
+    {
+      "id": "read-xdmf",
+      "definition_id": "load-muscat",
+      "parameters": {
+        "path": ""
+      },
+      "position": {
+        "x": 612.6628194558942,
+        "y": 647.5762572135203
+      }
+    },
+    {
+      "id": "sphere-file",
+      "definition_id": "select-file",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/SpherePoints.csv"
+      },
+      "position": {
+        "x": 5.568298703530672,
+        "y": 1514.1501234223763
+      }
+    },
+    {
+      "id": "read-sphere",
+      "definition_id": "load-csv",
+      "parameters": {
+        "path": ""
+      },
+      "position": {
+        "x": 618.2311181594249,
+        "y": 1511.7263806358965
+      }
+    },
+    {
+      "id": "view-original",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "",
+        "show_representation": true,
+        "show_axis_grid": true
+      },
+      "position": {
+        "x": 1292.2918384171467,
+        "y": 12.118713932399
+      }
+    },
+    {
+      "id": "stl-transform",
+      "definition_id": "transform",
+      "parameters": {
+        "translation": [
+          0,
+          3,
+          0
+        ],
+        "first": [
+          1,
+          0,
+          0
+        ],
+        "second": [
+          0,
+          1,
+          0
+        ],
+        "keepNormalized": true,
+        "keepOrthogonal": true
+      },
+      "position": {
+        "x": 1986.2920759309359,
+        "y": 20.668666647887875
+      }
+    },
+    {
+      "id": "move-stl",
+      "definition_id": "apply-transform",
+      "parameters": {
+        "onVectorFields": true,
+        "inverse": true
+      },
+      "position": {
+        "x": 2700.536131004456,
+        "y": -74.25926442855885
+      }
+    },
+    {
+      "id": "view-stl",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "",
+        "show_representation": true,
+        "show_axis_grid": false
+      },
+      "position": {
+        "x": 3338.922137917014,
+        "y": 1.0517310072050563
+      }
+    },
+    {
+      "id": "export-stl",
+      "definition_id": "write-muscat",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Demo-STL-shifted.xdmf"
+      },
+      "position": {
+        "x": 3366.040867832623,
+        "y": -213.8601340168039
+      }
+    },
+    {
+      "id": "xdmf-transform",
+      "definition_id": "transform",
+      "parameters": {
+        "translation": [
+          0,
+          -3,
+          0
+        ],
+        "first": [
+          1,
+          0,
+          0
+        ],
+        "second": [
+          0,
+          1,
+          0
+        ],
+        "keepNormalized": true,
+        "keepOrthogonal": true
+      },
+      "position": {
+        "x": 2047.0568837592737,
+        "y": 1003.3223413025555
+      }
+    },
+    {
+      "id": "move-xdmf",
+      "definition_id": "apply-transform",
+      "parameters": {
+        "onVectorFields": true,
+        "inverse": true
+      },
+      "position": {
+        "x": 2716.9453689028333,
+        "y": 687.6208446198871
+      }
+    },
+    {
+      "id": "view-xdmf",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "RegionId",
+        "show_representation": true,
+        "show_axis_grid": false
+      },
+      "position": {
+        "x": 3346.5860289024627,
+        "y": 835.0944259235698
+      }
+    },
+    {
+      "id": "export-xdmf",
+      "definition_id": "write-muscat",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Demo-XDMF-surface.xdmf"
+      },
+      "position": {
+        "x": 3347.390652342222,
+        "y": 667.4581428529079
+      }
+    },
+    {
+      "id": "sphere-transform",
+      "definition_id": "transform",
+      "parameters": {
+        "translation": [
+          4,
+          6,
+          0
+        ],
+        "first": [
+          1,
+          0,
+          0
+        ],
+        "second": [
+          0,
+          1,
+          0
+        ],
+        "keepNormalized": true,
+        "keepOrthogonal": true
+      },
+      "position": {
+        "x": 2052.6251824628043,
+        "y": 1867.472464724932
+      }
+    },
+    {
+      "id": "move-sphere",
+      "definition_id": "apply-transform",
+      "parameters": {
+        "onVectorFields": true,
+        "inverse": true
+      },
+      "position": {
+        "x": 2652.4372648838744,
+        "y": 1507.4491694710366
+      }
+    },
+    {
+      "id": "view-sphere",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "Points_2",
+        "show_representation": true,
+        "show_axis_grid": false
+      },
+      "position": {
+        "x": 3349.0324833504856,
+        "y": 1735.2809914001375
+      }
+    },
+    {
+      "id": "export-sphere",
+      "definition_id": "write-muscat",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Demo-Sphere-volume.xdmf"
+      },
+      "position": {
+        "x": 3361.2336375137183,
+        "y": 1509.8729122575164
+      }
+    },
+    {
+      "id": "surface-selector",
+      "definition_id": "create-muscat-element-filter",
+      "parameters": {
+        "dimensionality": [
+          2
+        ],
+        "element_types": [],
+        "ntag": [],
+        "etag": [],
+        "nFilterTreatment": "ALL_NODES",
+        "zonesTreatment": "CENTER"
+      },
+      "position": {
+        "x": 612.6628194558942,
+        "y": 947.5762572135203
+      }
+    },
+    {
+      "id": "tag-surface",
+      "definition_id": "create-tag",
+      "parameters": {
+        "tagName": "demo_surface",
+        "nodeTag": false,
+        "overwrite": false
+      },
+      "position": {
+        "x": 1292.2918384171467,
+        "y": 662.118713932399
+      }
+    },
+    {
+      "id": "tag-selector",
+      "definition_id": "create-muscat-element-filter",
+      "parameters": {
+        "dimensionality": [],
+        "element_types": [],
+        "ntag": [],
+        "etag": [
+          "demo_surface"
+        ],
+        "nFilterTreatment": "ALL_NODES",
+        "zonesTreatment": "CENTER"
+      },
+      "position": {
+        "x": 1292.2918384171467,
+        "y": 962.118713932399
+      }
+    },
+    {
+      "id": "extract-surface",
+      "definition_id": "filter-mesh-muscat",
+      "parameters": {},
+      "position": {
+        "x": 2047.0568837592737,
+        "y": 670.2589774527081
+      }
+    },
+    {
+      "id": "sphere-points",
+      "definition_id": "csv-to-mesh",
+      "parameters": {
+        "value": [
+          "Points_0",
+          "Points_1",
+          "Points_2"
+        ]
+      },
+      "position": {
+        "x": 1299.6969906678912,
+        "y": 1509.7371554298516
+      }
+    },
+    {
+      "id": "tetrahedralize",
+      "definition_id": "delaunay-3d",
+      "parameters": {},
+      "position": {
+        "x": 2001.193283140819,
+        "y": 1503.1825905724506
+      }
+    },
+    {
+      "id": "sphere-table",
+      "definition_id": "mesh-to-table",
+      "parameters": {
+        "entity": "node"
+      },
+      "position": {
+        "x": 3368.422425642324,
+        "y": 2385.825096923633
+      }
+    },
+    {
+      "id": "view-sphere-table",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 4039.8816177280614,
+        "y": 2531.2496641124208
+      }
+    },
+    {
+      "id": "export-sphere-table",
+      "definition_id": "write-table",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Demo-Sphere-fields.xlsx",
+        "sheet_name": "Sphere fields",
+        "header": true
+      },
+      "position": {
+        "x": 4052.0827718912933,
+        "y": 2208.891873510607
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "stl-file",
+      "source_port": "path",
+      "target_node": "read-stl",
+      "target_port": "path"
+    },
+    {
+      "source_node": "xdmf-file",
+      "source_port": "path",
+      "target_node": "read-xdmf",
+      "target_port": "path"
+    },
+    {
+      "source_node": "sphere-file",
+      "source_port": "path",
+      "target_node": "read-sphere",
+      "target_port": "path"
+    },
+    {
+      "source_node": "read-stl",
+      "source_port": "mesh",
+      "target_node": "view-original",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "stl-transform",
+      "source_port": "Transform",
+      "target_node": "move-stl",
+      "target_port": "Transform"
+    },
+    {
+      "source_node": "move-stl",
+      "source_port": "mesh",
+      "target_node": "view-stl",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "move-stl",
+      "source_port": "mesh",
+      "target_node": "export-stl",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "xdmf-transform",
+      "source_port": "Transform",
+      "target_node": "move-xdmf",
+      "target_port": "Transform"
+    },
+    {
+      "source_node": "move-xdmf",
+      "source_port": "mesh",
+      "target_node": "view-xdmf",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "move-xdmf",
+      "source_port": "mesh",
+      "target_node": "export-xdmf",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "sphere-transform",
+      "source_port": "Transform",
+      "target_node": "move-sphere",
+      "target_port": "Transform"
+    },
+    {
+      "source_node": "move-sphere",
+      "source_port": "mesh",
+      "target_node": "view-sphere",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "move-sphere",
+      "source_port": "mesh",
+      "target_node": "export-sphere",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "read-stl",
+      "source_port": "mesh",
+      "target_node": "move-stl",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "read-xdmf",
+      "source_port": "mesh",
+      "target_node": "tag-surface",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "surface-selector",
+      "source_port": "filter",
+      "target_node": "tag-surface",
+      "target_port": "filter"
+    },
+    {
+      "source_node": "tag-surface",
+      "source_port": "mesh",
+      "target_node": "extract-surface",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "tag-selector",
+      "source_port": "filter",
+      "target_node": "extract-surface",
+      "target_port": "filter"
+    },
+    {
+      "source_node": "extract-surface",
+      "source_port": "mesh",
+      "target_node": "move-xdmf",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "read-sphere",
+      "source_port": "table",
+      "target_node": "sphere-points",
+      "target_port": "table"
+    },
+    {
+      "source_node": "sphere-points",
+      "source_port": "mesh",
+      "target_node": "tetrahedralize",
+      "target_port": "meshDocument"
+    },
+    {
+      "source_node": "tetrahedralize",
+      "source_port": "meshDocument",
+      "target_node": "move-sphere",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "move-sphere",
+      "source_port": "mesh",
+      "target_node": "sphere-table",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "sphere-table",
+      "source_port": "table",
+      "target_node": "view-sphere-table",
+      "target_port": "value"
+    },
+    {
+      "source_node": "sphere-table",
+      "source_port": "table",
+      "target_node": "export-sphere-table",
+      "target_port": "data"
+    }
+  ]
+}

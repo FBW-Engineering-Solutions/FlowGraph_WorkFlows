@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "remesh-a-tetrahedral-cube/1.0.0",
+  "workflow_name": "Remesh a Tetrahedral Cube",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Remesh: Refine a Tetrahedral Cube\r\n\r\nThis workflow generates a coarse tetrahedral unit cube and refines it using **MMG in-memory remeshing**. It displays the original and refined meshes side by side, previews their node-ID tables, and exports both meshes.\r\n\r\nThe remeshing settings target an edge-size range of **0.08–0.18**, with a geometric approximation tolerance (`hausd`) of **0.01**. Coloring by element ID helps reveal the surface triangulation; it does not represent mesh quality.\r\n\r\n## Try it\r\n\r\n1. Click **Run workflow**—no input files or demo uploads are needed.\r\n2. Open the **3D view** to compare the coarse cube with the shifted, remeshed copy.\r\n3. Refresh **User Files** to download `Remesh-before.xdmf` and `Remesh-after.xdmf`, together with their companion HDF5 files.\r\n\r\nThe exported meshes share the same unshifted coordinate frame; the offset is for display only.\r\n\r\n> **Requirement:** Execution needs Muscat with the compiled **MmgInMemory** backend. Browser execution works only when its WASM build includes that backend.",
+  "uploaded_at": "2026-11-02T11:49:17Z",
+  "json_filename": "remesh.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "10"
+  }
+}

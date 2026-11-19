@@ -1,0 +1,47 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "my_change_extention",
+      "definition_id": "convert-mesh-file-format",
+      "parameters": {
+        "input_filename": "/tmp/flowgraph-user-data/",
+        "output_filename": "/tmp/flowgraph-user-data/",
+        "reader": "auto",
+        "writer": "auto",
+        "timestep_to_read": "all",
+        "binary": true
+      },
+      "position": {
+        "x": 342,
+        "y": 305
+      }
+    },
+    {
+      "id": "title-doc-2",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Multi-timestep mesh file format converter"
+      },
+      "position": {
+        "x": 143,
+        "y": 176
+      }
+    },
+    {
+      "id": "paragraph-doc-3",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# ← 1) Make your input files available to the workflow using the User Files panel\n\n# 2) Click the chevron **v** to open the node's options\n\n# Inputs\n\n- Input filename\n- Output filename\n- Reader to use\n- Writer to use\n- Timestep to read\n\n# 3) Run the FlowGraph workflow by clicking **Run workflow** in the top-right corner"
+      },
+      "position": {
+        "x": -12,
+        "y": 305
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": []
+}

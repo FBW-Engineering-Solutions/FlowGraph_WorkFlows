@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "explore-a-plaid-dataset/1.0.0",
+  "workflow_name": "Explore a Plaid Dataset",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "## Inspect a PLAID Dataset\r\n\r\nExplore a PLAID dataset by selecting a sample and time step, then visualizing the resulting mesh and its fields. This introductory workflow includes step-by-step annotations to guide dataset loading, sample selection, and visualization.\r\n\r\n### How it works\r\n\r\n1. __Load a dataset__ — Set the path to your PLAID dataset directory.\r\n2. __Choose a sample__ — Select the dataset split and sample number. The workflow defaults to sample `0` from the `train` split.\r\n3. __Select a time step__ — Choose the time value to inspect, initially set to `0`.\r\n4. __Inspect the mesh__ — View the extracted mesh, change the displayed field, and adjust the representation and axis-grid settings. The default color field is `sig22`.\r\n\r\n### Before running\r\n\r\nUpdate the dataset path to match your environment and ensure the selected field is available. The workflow’s embedded instructions specify using a local Python backend for datasets that do not use the CGNS backend; connect it through __Run → Python Backend…__.\r\n\r\n__Result:__ An interactive mesh visualization for inspecting a selected dataset sample and time step. The workflow does not modify the dataset or export files.",
+  "uploaded_at": "2026-11-02T12:12:05Z",
+  "json_filename": "PlaidViewer.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "12"
+  }
+}

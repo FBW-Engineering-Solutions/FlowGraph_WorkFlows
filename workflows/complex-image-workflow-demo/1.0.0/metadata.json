@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "complex-image-workflow-demo/1.0.0",
+  "workflow_name": "Complex Image Workflow (Demo)",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Color Cardboard: Multi-Branch Image Processing\r\n\r\nThis workflow demonstrates how to prepare a shared image input, process it through multiple branches, preview and export the results, and calculate image fluency metrics. It uses the bundled **ColorCardboard.jpg** image with existing **Pillow and NumPy nodes**—no Fiji or ImageJ is required.\r\n\r\n## How it works\r\n\r\n### 1. Prepare the image\r\n\r\nThe workflow reads the source image, resizes it to **320 × 256 pixels**, and crops its central region using these coordinates:\r\n\r\n| Crop boundary | Value |\r\n|---|---:|\r\n| Left | 32 |\r\n| Top | 32 |\r\n| Right | 288 |\r\n| Bottom | 224 |\r\n\r\nThe resulting **256 × 192 pixel** crop provides a shared input for the processing branches.\r\n\r\n> **Note:** Resizing to the fixed dimensions intentionally changes the original aspect ratio and keeps the demo lightweight.\r\n\r\n### 2. Process, preview, and export\r\n\r\nThe prepared image feeds three processing branches. Each result connects to an inline preview and a lossless PNG export.\r\n\r\n| Branch | Processing | Output dimensions | Export file |\r\n|---|---|---|---|\r\n| Color | Preserve the prepared color crop | 256 × 192 | `Cardboard-color.png` |\r\n| Grayscale | Convert the crop to grayscale (`L` mode) | 256 × 192 | `Cardboard-gray.png` |\r\n| Rotated | Rotate the grayscale image by 90° with expansion enabled | 192 × 256 | `Cardboard-rotated.png` |\r\n\r\n### 3. Inspect image fluency metrics\r\n\r\nThe unrotated grayscale crop also feeds an **Image Fluency Metrics** node. Five **Show Value** nodes display the following measurements, from top to bottom:\r\n\r\n1. Contrast\r\n2. Compression complexity\r\n3. Self-similarity\r\n4. Vertical symmetry\r\n5. Horizontal symmetry\r\n\r\nThese are descriptive image measurements, **not an overall image-quality score**.\r\n\r\n## Try it\r\n\r\n1. Choose **Demos → Add demo files to temporary user files**. Use the temporary folder rather than a mounted directory.\r\n2. Click **Run workflow**. The bundled source image requires no upload or external download.\r\n3. Compare the color, grayscale, and rotated previews, then inspect the five metric values.\r\n4. Refresh **User files** and download the three generated PNG files.\r\n5. Change the crop coordinates or select another source image, then run the workflow again to explore how the results change.\r\n\r\n> **Note:** Running the workflow again overwrites the generated PNG files, but leaves the original JPG unchanged.",
+  "uploaded_at": "2026-11-02T09:58:21Z",
+  "json_filename": "Complex_Image_Workflow.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "3"
+  }
+}

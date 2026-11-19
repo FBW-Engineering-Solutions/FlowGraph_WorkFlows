@@ -1,0 +1,286 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "remesh-title",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Remesh: refine a tetrahedral cube with MMG"
+      },
+      "position": {
+        "x": 0,
+        "y": -550
+      }
+    },
+    {
+      "id": "remesh-instructions",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Run this standalone example\nClick **Run workflow**, then open the 3D view. No demo-file upload is needed: Create Cube generates a coarse unit cube with 64 nodes and 162 tetrahedra plus boundary triangles. The original stays at X=0..1; the remeshed copy is displayed at X=1.5..2.5. Both viewers color by **flowgraph_element_id**, a scalar field with one unique ID per element. Flat cell coloring reveals the coarse versus refined surface triangles without needing wireframe. The colorbar shows element IDs, not quality or a shared size scale.\n\nThis demo requires Muscat with the compiled **MmgInMemory** backend. Native/hosted execution must provide it; browser execution only works when the installed WASM build includes that backend. A missing-backend error is not fixed by uploading files. The external mmg backend is not used."
+      },
+      "position": {
+        "x": 0,
+        "y": -420
+      }
+    },
+    {
+      "id": "options-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Remeshing settings\nThe Remesh node uses JSON options: hmin=0.08, hmax=0.18, hausd=0.01, in the cube coordinate units. hmin/hmax bound the target edge-size range; hausd controls geometric approximation. These are remesher settings, not strict guarantees for every output edge. Lower hmax usually produces more elements and takes longer.\n\nNo metric, level set, or solution is connected. This is isotropic remeshing, not field-driven adaptation. Counts can differ across MMG versions. A generated cube is used because the bundled logo surfaces fail MMG geometry checks with these settings."
+      },
+      "position": {
+        "x": 650,
+        "y": -420
+      }
+    },
+    {
+      "id": "export-notes",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "## Exports and comparison\nRefresh User files after execution. Download Remesh-before.xdmf with Remesh-before0.h5, and Remesh-after.xdmf with Remesh-after0.h5. Keep each pair together. The files contain the original and remeshed geometry in the same unshifted coordinate frame; translation is for display only. Running again overwrites these generated exports.\n\nMesh to Table previews the engine-generated node IDs for each mesh; its row count gives the number of nodes, not an element-quality measurement. Remeshing changes connectivity and IDs. Arbitrary source fields are not automatically interpolated by this demo."
+      },
+      "position": {
+        "x": 1300,
+        "y": -420
+      }
+    },
+    {
+      "id": "coarse-cube",
+      "definition_id": "create-cube",
+      "parameters": {
+        "dimensions": [
+          4,
+          4,
+          4
+        ],
+        "origin": [
+          0,
+          0,
+          0
+        ],
+        "spacing": [
+          0.3333333333333333,
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "ofTetras": true
+      },
+      "position": {
+        "x": 0,
+        "y": 100
+      }
+    },
+    {
+      "id": "remesh-cube",
+      "definition_id": "remesh",
+      "parameters": {
+        "backend": "MmgInMemory",
+        "remesherOptions": "{\"hmin\": 0.08, \"hmax\": 0.18, \"hausd\": 0.01}",
+        "backendOptions": "{}"
+      },
+      "position": {
+        "x": 676.8818697721398,
+        "y": 369.00728123200486
+      }
+    },
+    {
+      "id": "view-before",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "flowgraph_element_id",
+        "show_representation": true,
+        "show_axis_grid": true
+      },
+      "position": {
+        "x": 1922.6443358792862,
+        "y": -95.28375298640978
+      }
+    },
+    {
+      "id": "comparison-offset",
+      "definition_id": "transform",
+      "parameters": {
+        "translation": [
+          1.5,
+          0,
+          0
+        ],
+        "first": [
+          1,
+          0,
+          0
+        ],
+        "second": [
+          0,
+          1,
+          0
+        ],
+        "keepNormalized": true,
+        "keepOrthogonal": true
+      },
+      "position": {
+        "x": 693.1226950427158,
+        "y": 750.4018831103335
+      }
+    },
+    {
+      "id": "offset-after",
+      "definition_id": "apply-transform",
+      "parameters": {
+        "onVectorFields": true,
+        "inverse": true
+      },
+      "position": {
+        "x": 1302.1628886502797,
+        "y": 685.1522577491392
+      }
+    },
+    {
+      "id": "view-after",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "flowgraph_element_id",
+        "show_representation": true,
+        "show_axis_grid": false
+      },
+      "position": {
+        "x": 1917.3317211776694,
+        "y": 579.8967154380607
+      }
+    },
+    {
+      "id": "export-before",
+      "definition_id": "write-muscat",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Remesh-before.xdmf"
+      },
+      "position": {
+        "x": 675.9239604194544,
+        "y": 187.3977510489726
+      }
+    },
+    {
+      "id": "table-before",
+      "definition_id": "mesh-to-table",
+      "parameters": {
+        "entity": "node"
+      },
+      "position": {
+        "x": 674.1443215584569,
+        "y": 1119.611590736102
+      }
+    },
+    {
+      "id": "node-ids-before",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1322.352859764879,
+        "y": 1229.1408134043552
+      }
+    },
+    {
+      "id": "export-after",
+      "definition_id": "write-muscat",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/Remesh-after.xdmf"
+      },
+      "position": {
+        "x": 1292.0476694077481,
+        "y": 246.30973959507082
+      }
+    },
+    {
+      "id": "table-after",
+      "definition_id": "mesh-to-table",
+      "parameters": {
+        "entity": "node"
+      },
+      "position": {
+        "x": 1297.8726284852598,
+        "y": 462.25684126937284
+      }
+    },
+    {
+      "id": "node-ids-after",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 2604.3814463393423,
+        "y": 302.86282850965534
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "coarse-cube",
+      "source_port": "mesh",
+      "target_node": "remesh-cube",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "coarse-cube",
+      "source_port": "mesh",
+      "target_node": "view-before",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "remesh-cube",
+      "source_port": "mesh",
+      "target_node": "offset-after",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "comparison-offset",
+      "source_port": "Transform",
+      "target_node": "offset-after",
+      "target_port": "Transform"
+    },
+    {
+      "source_node": "offset-after",
+      "source_port": "mesh",
+      "target_node": "view-after",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "coarse-cube",
+      "source_port": "mesh",
+      "target_node": "export-before",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "coarse-cube",
+      "source_port": "mesh",
+      "target_node": "table-before",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "table-before",
+      "source_port": "table",
+      "target_node": "node-ids-before",
+      "target_port": "value"
+    },
+    {
+      "source_node": "remesh-cube",
+      "source_port": "mesh",
+      "target_node": "export-after",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "remesh-cube",
+      "source_port": "mesh",
+      "target_node": "table-after",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "table-after",
+      "source_port": "table",
+      "target_node": "node-ids-after",
+      "target_port": "value"
+    }
+  ]
+}

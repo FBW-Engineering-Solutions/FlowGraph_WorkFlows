@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "multi-time-step-mesh-file-format-converter/1.0.0",
+  "workflow_name": "Multi Time Step Mesh File Format Converter",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# Mesh File Format Converter\r\n\r\nThis workflow uses a single **Mesh File Format Converter** node to convert mesh files between formats, with options for selecting readers, writers, and timesteps.\r\n\r\n## Try it\r\n\r\n1. Make your input mesh available through the **User Files** panel.\r\n2. Expand the converter node’s options using its chevron.\r\n3. Set the **input filename** and **output filename**, including their extensions. Both initially point to `/tmp/flowgraph-user-data/` and need complete filenames.\r\n4. Leave the reader and writer set to **auto**, or select them explicitly.\r\n5. Choose the timesteps to read—the default is **all**—and adjust the binary-output option if needed.\r\n6. Click **Run workflow**, then refresh **User Files** to find the converted file.\r\n\r\n> **Note:** Use a different output filename to preserve the original mesh.",
+  "uploaded_at": "2026-11-02T11:45:08Z",
+  "json_filename": "MeshfileConverter.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "9"
+  }
+}

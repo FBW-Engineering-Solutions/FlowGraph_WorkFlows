@@ -1,0 +1,139 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "set-float-1",
+      "definition_id": "set-float",
+      "parameters": {
+        "value": 3.14159
+      },
+      "position": {
+        "x": 28,
+        "y": 296
+      }
+    },
+    {
+      "id": "set-vec3d-2",
+      "definition_id": "set-vec3d",
+      "parameters": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "position": {
+        "x": 670,
+        "y": 272
+      }
+    },
+    {
+      "id": "show-value-3",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1250,
+        "y": 258
+      }
+    },
+    {
+      "id": "set-string-5",
+      "definition_id": "set-string",
+      "parameters": {
+        "value": "Label Text"
+      },
+      "position": {
+        "x": 31,
+        "y": -30
+      }
+    },
+    {
+      "id": "show-value-4",
+      "definition_id": "show-value",
+      "parameters": {},
+      "position": {
+        "x": 1250,
+        "y": 14
+      }
+    },
+    {
+      "id": "int-slider-9",
+      "definition_id": "int-slider",
+      "parameters": {
+        "min": 0,
+        "max": 42,
+        "value": 19
+      },
+      "position": {
+        "x": 29,
+        "y": 462
+      }
+    },
+    {
+      "id": "paragraph-doc-8",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Arrows\n\n$\\color{#55a7df}{\\text{Blue}}$ arrows indicate direct connections.\n\n$\\color{#ffb300}{\\text{Orange}}$ arrows indicate connections that require conversion (with possible data loss).\n"
+      },
+      "position": {
+        "x": 670,
+        "y": 107
+      }
+    },
+    {
+      "id": "set-boolean-10",
+      "definition_id": "set-boolean",
+      "parameters": {
+        "value": true
+      },
+      "position": {
+        "x": 28,
+        "y": 135
+      }
+    },
+    {
+      "id": "paragraph-doc-10",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Demo showing how to define inputs using scalar values\n"
+      },
+      "position": {
+        "x": 627,
+        "y": -165
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "set-float-1",
+      "source_port": "value",
+      "target_node": "set-vec3d-2",
+      "target_port": "y"
+    },
+    {
+      "source_node": "set-vec3d-2",
+      "source_port": "value",
+      "target_node": "show-value-3",
+      "target_port": "value"
+    },
+    {
+      "source_node": "set-string-5",
+      "source_port": "value",
+      "target_node": "show-value-4",
+      "target_port": "value"
+    },
+    {
+      "source_node": "int-slider-9",
+      "source_port": "value",
+      "target_node": "set-vec3d-2",
+      "target_port": "z"
+    },
+    {
+      "source_node": "set-boolean-10",
+      "source_port": "value",
+      "target_node": "set-vec3d-2",
+      "target_port": "x"
+    }
+  ]
+}

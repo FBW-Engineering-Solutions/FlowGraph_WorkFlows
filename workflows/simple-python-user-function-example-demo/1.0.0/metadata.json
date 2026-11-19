@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "catalog_key": "simple-python-user-function-example-demo/1.0.0",
+  "workflow_name": "Simple Python User Function Example (Demo)",
+  "author": "Felipe Bordeu",
+  "company": "FBW Engineering Solutions",
+  "version": "1.0.0",
+  "description": "# User Function: Rectangle Area and Perimeter\r\n\r\nThis workflow demonstrates how to use a **User Function** node to run custom Python code with typed inputs and multiple outputs. It takes a rectangle’s width and height, calculates its area and perimeter, and displays each result in a separate **Show Value** node.\r\n\r\n## How it works\r\n\r\nTwo **Set Float** nodes supply the inputs:\r\n\r\n| Input | Default value |\r\n|---|---:|\r\n| Width | 3.0 |\r\n| Height | 4.0 |\r\n\r\nThe **User Function** node performs the calculations:\r\n\r\n```python\r\ndef Execute(width: float, height: float) -> tuple[float, float]:\r\n    area = width * height\r\n    perimeter = 2.0 * (width + height)\r\n    return (area, perimeter)\r\n```\r\n\r\nThe function’s type annotations define its ports:\r\n\r\n- `width: float` and `height: float` define the two input ports.\r\n- `tuple[float, float]` defines two output ports: `output1` for area and `output2` for perimeter.\r\n\r\nEach output connects to a **Show Value** node. With the default inputs, the results are **12.0** for area and **14.0** for perimeter.\r\n\r\n## Try it\r\n\r\n1. Choose **View → Show All Node Details** to inspect the input values and Python code.\r\n2. Click **Run workflow** to calculate and display the results.\r\n3. Change the width or height, then run the workflow again.\r\n4. Experiment with another calculation by editing the function body while keeping its signature and existing connections.\r\n\r\nNo files or additional packages are required.\r\n\r\n> **Note:** Return values must match the number, order, and types declared in the return annotation. Only run Python code you trust.",
+  "uploaded_at": "2026-11-02T09:44:00Z",
+  "json_filename": "PythonUserFunction.json",
+  "source": {
+    "catalog_url": "https://flowgraph-catalog.fbw-es.com/workflows/",
+    "id": "2"
+  }
+}
