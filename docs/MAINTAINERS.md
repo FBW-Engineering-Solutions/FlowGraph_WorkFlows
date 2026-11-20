@@ -77,18 +77,46 @@ Python example calculates rectangle area and perimeter. Workflow authorship was
 confirmed by the owner before applying BSD-3-Clause to all repository content.
 Dependencies and externally supplied datasets retain their own license terms.
 
-## Service cutover — not implemented
+## Staging release bundles
+
+After committing and reviewing changes, build outside the working tree:
+
+```sh
+python3 tools/build_release.py --initial --output /tmp/flowgraph-release
+# Subsequent releases require the release ID currently deployed on staging:
+python3 tools/build_release.py --previous-release CURRENT_64_CHARACTER_RELEASE_ID --output /tmp/flowgraph-next-release
+```
+
+The builder refuses dirty trees and existing destinations. Bundles contain a
+deterministic `catalog.json` with source commit, schema version, parent release,
+metadata, original workflow text and per-workflow SHA-256 checksums. `READY`
+contains the SHA-256 of the exact payload bytes. JSON escaping does not alter the
+download bytes recovered by the importer. Limits: 1,000 entries, 16 MiB total,
+2 MiB per workflow. Build from the reviewed merge commit, not a local PR head.
+
+Upload into the staging application's **private**
+`storage/app/private/catalog-inbox/pending` directory, never its public directory.
+Remove old `READY` first, upload `catalog.json`, then upload `READY` **last**.
+Do not mutate a ready bundle during an import. The CLI-only staging importer
+uses filesystem and database locks, validates before mutation and commits data,
+entry mappings and release history together. Check cron logs for the resulting
+release ID before preparing the next release. Checksums detect corruption, not
+authenticity: SFTP credentials and reviewed source access remain trust boundaries.
+
+No automatic upload or GitHub deployment credentials are configured yet.
+
+## Production service cutover — not implemented
 
 The website is still independently editable. Do not claim Git is the live service's
 only writer yet. Avoid simultaneous website/repository editing; reconcile a final
 snapshot before cutover.
 
-1. Confirm a supported server import trigger. SFTP uploads alone cannot execute PHP;
-   investigate hosting-scheduled tasks or another narrowly scoped mechanism.
-2. Build versioned releases and a transactional, revalidating importer. Preserve
-   workflow IDs, accounts and unrelated state. Serialize imports, reject stale
-   releases, and support explicit retirement and rollback.
-3. Test failures, recovery, and API/download smoke checks on staging.
+1. PHP 8.5 scheduled tasks have been verified on staging. Disable the diagnostic
+   cron before setting up the importer cron; SFTP alone does not execute PHP.
+2. The staging release builder and transactional importer are implemented. Rehearse
+   deployment using the website repository's staging instructions. No automatic
+   deletion or production importer is enabled; retirement needs explicit design.
+3. Complete hosted staging failure/recovery and API/download smoke checks.
 4. Disable website publishing during final reconciliation. Keep Git-managed entries
    read-only afterward, then enable production synchronization.
 
