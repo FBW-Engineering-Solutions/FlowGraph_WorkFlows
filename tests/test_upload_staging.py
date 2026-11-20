@@ -122,16 +122,14 @@ class UploadTests(unittest.TestCase):
                 quote(value)
         self.assertEqual(quote('/tmp/file with spaces'), '"/tmp/file with spaces"')
 
-    def test_workflow_has_manual_trigger_and_scoped_credentials(self):
-        workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/deploy-staging.yml').read_text()
-        self.assertIn('workflow_dispatch:', workflow)
-        self.assertNotIn('pull_request:', workflow)
-        self.assertNotIn('\n  push:', workflow)
-        self.assertIn("if: github.ref == 'refs/heads/master'", workflow)
-        self.assertIn('environment: staging', workflow)
-        self.assertIn('cancel-in-progress: false', workflow)
-        self.assertNotIn('write-all', workflow)
-        self.assertNotIn('StrictHostKeyChecking=no', workflow)
+    def arguments(self, *extra):
+        known = self.root / 'known_hosts'
+        known.write_text('ftp.cluster129.hosting.ovh.net ssh-ed25519 example-test-key\n')
+        return ['upload_staging.py', '--bundle', str(self.bundle), '--previous-release', self.parent,
+                '--username', 'local-user', '--known-hosts', str(known), *extra]
+
+    def test_no_deployment_workflow(self):
+        self.assertFalse((Path(__file__).resolve().parents[1] / '.github/workflows/deploy-staging.yml').exists())
 
     def test_transport_pins_host_and_does_not_put_password_in_arguments(self):
         from types import SimpleNamespace
@@ -147,24 +145,44 @@ class UploadTests(unittest.TestCase):
             self.session(Path(arguments[arguments.index('-b') + 1]).read_text().splitlines())
             return SimpleNamespace(returncode=0)
 
-        environment = {'GITHUB_REF': 'refs/heads/master', 'STAGING_SFTP_USERNAME': 'staging-only',
-                       'STAGING_SFTP_PASSWORD': 'test-password',
-                       'STAGING_SFTP_KNOWN_HOSTS': 'ftp.cluster129.hosting.ovh.net ssh-ed25519 example-test-key'}
-        with patch.dict(os.environ, environment, clear=True), patch.object(sys, 'argv', [
-                'upload_staging.py', '--bundle', str(self.bundle), '--previous-release', self.parent]), \
+        with patch.dict(os.environ, {}, clear=True), patch.object(sys, 'argv', self.arguments()), \
+                patch('upload_staging.sys.stdin.isatty', return_value=True), \
+                patch('builtins.input', return_value='catalog-staging:' + self.identity), \
+                patch('upload_staging.getpass.getpass', return_value='test-password'), \
                 patch('upload_staging.subprocess.run', side_effect=execute):
             main()
         self.assertEqual(len(captured), 4)
         self.assertFalse(self.lock)
 
-    def test_non_master_cannot_connect(self):
-        with patch.dict(os.environ, {'GITHUB_REF': 'refs/heads/feature'}, clear=True), \
-                patch.object(sys, 'argv', ['upload_staging.py', '--bundle', str(self.bundle),
-                                          '--previous-release', self.parent]), \
+    def test_ci_and_noninteractive_and_wrong_confirmation_cannot_connect(self):
+        for environment, tty, answer in [({'CI': 'true'}, True, ''), ({}, False, ''), ({}, True, 'wrong')]:
+            with patch.dict(os.environ, environment, clear=True), \
+                    patch.object(sys, 'argv', self.arguments()), \
+                    patch('upload_staging.sys.stdin.isatty', return_value=tty), \
+                    patch('builtins.input', return_value=answer), \
+                    patch('upload_staging.getpass.getpass') as password, \
+                    patch('upload_staging.subprocess.run') as execute:
+                with self.assertRaises(SystemExit):
+                    main()
+                execute.assert_not_called()
+                password.assert_not_called()
+
+    def test_dry_run_never_prompts_or_connects(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(sys, 'argv', self.arguments('--dry-run')), \
+                patch('upload_staging.getpass.getpass') as password, \
                 patch('upload_staging.subprocess.run') as execute:
+            main()
+            password.assert_not_called()
+            execute.assert_not_called()
+
+    def test_unknown_host_refused_before_password(self):
+        arguments = self.arguments()
+        (self.root / 'known_hosts').write_text('other.example ssh-ed25519 example-test-key\n')
+        with patch.dict(os.environ, {}, clear=True), patch.object(sys, 'argv', arguments), \
+                patch('upload_staging.getpass.getpass') as password:
             with self.assertRaises(SystemExit):
                 main()
-            execute.assert_not_called()
+            password.assert_not_called()
 
 
 if __name__ == '__main__':

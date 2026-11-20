@@ -2,12 +2,14 @@
 """Publish a release to the fixed staging inbox using OpenSSH SFTP only."""
 
 import argparse
+import getpass
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 
 from validate_catalog import InvalidCatalog, require
@@ -71,16 +73,31 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bundle', type=Path, required=True)
     parser.add_argument('--previous-release', required=True)
+    parser.add_argument('--username', required=True, help='Hosting SFTP username; never a database username')
+    parser.add_argument('--known-hosts', type=Path, required=True, help='Local independently verified OpenSSH known_hosts file')
+    parser.add_argument('--dry-run', action='store_true', help='Validate and display destination without connecting')
     args = parser.parse_args()
     try:
-        require(os.environ.get('GITHUB_REF') == 'refs/heads/master', 'deployment requires master')
-        username = os.environ.get('STAGING_SFTP_USERNAME', '')
-        password = os.environ.get('STAGING_SFTP_PASSWORD', '')
-        hostkeys = os.environ.get('STAGING_SFTP_KNOWN_HOSTS', '')
-        require(bool(re.fullmatch(r'[A-Za-z0-9_-]+', username)) and bool(password), 'missing SFTP credentials')
-        require(bool(hostkeys.strip()) and all(
-            line.split()[0] == HOST and len(line.split()) >= 3
-            for line in hostkeys.splitlines() if line.strip()), 'invalid pinned host keys')
+        require(not os.environ.get('CI') and not os.environ.get('GITHUB_ACTIONS'), 'local deployment only; CI is refused')
+        identity = validate_bundle(args.bundle, args.previous_release)
+        username = args.username
+        require(bool(re.fullmatch(r'[A-Za-z0-9_-]+', username)), 'invalid SFTP username')
+        require(args.known_hosts.is_file() and not args.known_hosts.is_symlink()
+                and args.known_hosts.stat().st_size <= 1048576, 'missing or unsafe known_hosts file')
+        hostkeys = args.known_hosts.read_text()
+        require(any(len(line.split()) >= 3 and line.split()[0] == HOST
+                    for line in hostkeys.splitlines() if line.strip() and not line.startswith('#')),
+                'known_hosts must contain the verified staging host key')
+        print(f'STAGING ONLY: {HOST}:22{INBOX}/pending\nRelease: {identity}\nParent: {args.previous_release}')
+        if args.dry_run:
+            print('Dry run: no connection or password prompt. Hosting credentials remain local.')
+            return
+        require(sys.stdin.isatty(), 'run from an interactive local terminal')
+        confirmation = 'catalog-staging:' + identity
+        require(input('Confirm backup and parent import; type '+confirmation+': ') == confirmation,
+                'staging confirmation did not match')
+        password = getpass.getpass('Hosting SFTP password (not saved): ')
+        require(bool(password) and '\n' not in password and '\r' not in password, 'invalid password')
         with tempfile.TemporaryDirectory(prefix='catalog-sftp-') as temporary:
             work = Path(temporary)
             known = work / 'known_hosts'
@@ -90,7 +107,8 @@ def main():
             askpass.write_text('#!/bin/sh\nprintf "%s\\n" "$STAGING_SFTP_PASSWORD"\n')
             askpass.chmod(0o700)
             environment = {**os.environ, 'SSH_ASKPASS': str(askpass),
-                           'SSH_ASKPASS_REQUIRE': 'force', 'DISPLAY': ':0'}
+                           'SSH_ASKPASS_REQUIRE': 'force', 'DISPLAY': ':0',
+                           'STAGING_SFTP_PASSWORD': password}
 
             def session(commands):
                 batch = work / 'batch'
@@ -105,15 +123,9 @@ def main():
                     stderr=subprocess.PIPE, timeout=180)
                 require(result.returncode == 0, 'SFTP failed; inspect credentials, pin, permissions and upload.lock privately')
 
-            identity = publish(args.bundle.resolve(), args.previous_release, session, work)
+            identity = publish(args.bundle, args.previous_release, session, work)
         print('Uploaded staging bundle ' + identity + '. Database import is NOT yet confirmed; inspect cron logs.')
-        summary = os.environ.get('GITHUB_STEP_SUMMARY')
-        if summary:
-            with open(summary, 'a') as stream:
-                stream.write(f'## Staging bundle uploaded\n\nRelease: `{identity}`\n\n'
-                             f'Parent: `{args.previous_release}`\n\n'
-                             'Upload only. Confirm the scheduled import and verify downloads before the next deployment.\n')
-    except (InvalidCatalog, OSError, ValueError, subprocess.SubprocessError):
+    except (InvalidCatalog, OSError, EOFError, ValueError, subprocess.SubprocessError):
         parser.exit(1, 'Staging upload stopped. Do not delete release state. Inspect the inbox and upload.lock before retrying; no database import was confirmed.\n')
 
 
