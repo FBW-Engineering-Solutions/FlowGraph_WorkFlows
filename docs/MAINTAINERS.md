@@ -103,7 +103,77 @@ entry mappings and release history together. Check cron logs for the resulting
 release ID before preparing the next release. Checksums detect corruption, not
 authenticity: SFTP credentials and reviewed source access remain trust boundaries.
 
-No automatic upload or GitHub deployment credentials are configured yet.
+## Manual GitHub Actions staging deployment
+
+`Upload staging catalog` is an explicit `workflow_dispatch` workflow, never a push
+or PR deployment. It only accepts `master`, validates/tests the checked-out commit,
+builds a child bundle outside the checkout, and uploads catalog content only.
+No application code, SQL, `.env`, or production files are uploaded. The Actions
+result confirms **upload**, not database import. Keep the staging importer cron
+enabled for import and confirm its logs and downloads after each deployment.
+
+Before enabling it, create a GitHub environment named `staging` with deployment
+branches restricted to **master only** (not tags), required maintainer review, and
+admin protection bypass disabled. For a sole maintainer, self-review must remain
+allowed so a manually initiated deployment can be approved. Environment restrictions
+are mandatory: the workflow branch guard alone is not a credential boundary.
+
+Configure only these **environment secrets**, never repository-wide secrets:
+
+| Secret | Value |
+|---|---|
+| `STAGING_SFTP_USERNAME` | Dedicated least-privilege SFTP username |
+| `STAGING_SFTP_PASSWORD` | That account's SFTP password, not a database password |
+| `STAGING_SFTP_KNOWN_HOSTS` | Verified OpenSSH known_hosts line(s) for `ftp.cluster129.hosting.ovh.net` |
+
+Verify the host key against the fingerprint already trusted in FileZilla or an
+independent trusted hosting source. Do not trust `ssh-keyscan` output without
+independent fingerprint verification. Strict host-key checking is never disabled.
+Passwords are passed via SSH_ASKPASS, not command arguments, batch files or logs.
+
+**Do not put a shared hosting credential with production access into Actions.**
+The uploader hardcodes staging paths, but credentials themselves must be scoped
+by the server. A compromised runner could ignore client-side path checks. Confirm
+the account's visible SFTP filesystem has no production access. The current
+uploader expects the verified SFTP-visible path:
+`/home/fbwescj/catalog-staging/storage/app/private/catalog-inbox/pending`.
+If a restricted account changes its visible root, adjust and review the uploader's
+fixed path before using it; never widen the account's access to make it work.
+No secrets are provisioned by repository files or the coding agent.
+
+Run from Actions → Upload staging catalog → Run workflow, branch **master**:
+
+- `previous_release`: the ID confirmed in `catalog_release_state`, not merely the
+  previous Actions upload result. Confirm that release's cron import succeeded.
+- `confirmation`: exactly `upload-staging`.
+- Approve the environment deployment after reviewing source and input values.
+
+Only one Actions deployment runs at a time; an SFTP `upload.lock` directory also
+blocks concurrent uploaders. The remote pending marker must match the supplied
+parent or the exact same release (retry). This does **not** query SQL: the importer
+remains authoritative for stale-parent rejection. Wait for a successful import
+before starting any child upload. Do not upload manually while Actions runs.
+
+The payload is uploaded as `catalog.json.uploading`, downloaded for SHA-256
+verification, and a temporary marker is staged. Only then is old READY removed,
+the payload replaced, and the new marker renamed into place last. The importer
+may safely reject temporary extra files during transfer; an in-flight importer
+may finish the previous release. SQL locking and parent checks still apply.
+Transient cron validation failures during upload are not deployment confirmation.
+
+On an interrupted upload, the remote `upload.lock` intentionally remains. Pause
+the importer cron, ensure no uploader is running, and inspect the private inbox.
+If old READY/catalog are intact, remove only temporary `.uploading` files and the
+empty `upload.lock`, then retry with the same confirmed parent. If the final pair
+is incomplete, remove READY, restore a complete verified pair manually (READY
+last), clean temporary files, and remove the empty lock. If the new final pair is
+already intact, clean temporary files and the lock, resume cron, and confirm import
+before dispatching again. Never delete release history or reset SQL release state.
+Use `rmdir`/delete-empty-directory for the lock, never recursive application cleanup.
+
+Automated upload requires its first hosted rehearsal. Production deployment remains
+unsupported. After each successful import, run the website repository's read-only
+verifier against the exact bundle and check repeat-import safety.
 
 ## Production service cutover — not implemented
 
