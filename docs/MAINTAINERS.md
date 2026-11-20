@@ -103,7 +103,66 @@ entry mappings and release history together. Check cron logs for the resulting
 release ID before preparing the next release. Checksums detect corruption, not
 authenticity: SFTP credentials and reviewed source access remain trust boundaries.
 
-No automatic upload or GitHub deployment credentials are configured yet.
+## Local interactive staging deployment
+
+Hosting provides only one account with access to production. Its credentials must
+stay on the maintainer's local computer, never in GitHub secrets or CI. There is
+no deployment Actions workflow. `tools/upload_staging.py` refuses CI environments
+and requires a terminal, explicit staging confirmation, and a hidden password
+prompt. Passwords are not saved to disk or passed in command arguments; SSH_ASKPASS
+supplies them to the local OpenSSH process through its private environment.
+
+Build from clean reviewed master using the currently imported release ID. The
+uploader does not prove the commit was reviewed; the maintainer must do that.
+Verify the host key independently against the trusted FileZilla fingerprint or a
+trusted hosting source before adding its OpenSSH line to a local known_hosts file.
+Do not trust ssh-keyscan output alone. Strict host-key checking is never disabled.
+Use an existing verified known_hosts file if it contains the exact hostname
+`ftp.cluster129.hosting.ovh.net` (plain hostname entries, not only hashed ones).
+
+Example (replace the username and parent ID with your values):
+
+```sh
+python3 tools/upload_staging.py --bundle /tmp/flowgraph-next-release \
+  --previous-release CURRENT_64_CHARACTER_RELEASE_ID \
+  --username YOUR_SFTP_USERNAME --known-hosts /home/YOUR_USER/.ssh/known_hosts --dry-run
+# Repeat without --dry-run to confirm staging and enter your password privately.
+```
+
+The fixed SFTP-visible destination is
+`/home/fbwescj/catalog-staging/storage/app/private/catalog-inbox/pending`.
+Only catalog bundle files are sent; no SQL, application code or production files.
+The fixed path is a safeguard, not server-side credential isolation. Run only
+reviewed code on a trusted computer. No password command-line/environment input
+is accepted from the caller; password entry is interactive only.
+
+Pause staging importer cron for the upload, then resume it and check cron logs.
+Upload success does not confirm import. Supply the parent ID from
+`catalog_release_state`, not merely the last uploaded marker. The remote marker
+must match that parent or the exact same release (retry). An SFTP `upload.lock`
+directory prevents simultaneous cooperating uploaders; do not upload with FileZilla
+at the same time. An interrupted transfer intentionally leaves the lock for repair.
+
+The payload is uploaded as `catalog.json.uploading`, downloaded for SHA-256
+verification, and a temporary marker is staged. Only then is old READY removed,
+the payload replaced, and the new marker renamed into place last. The importer
+may safely reject temporary extra files during transfer; an in-flight importer
+may finish the previous release. SQL locking and parent checks still apply.
+Transient cron validation failures during upload are not deployment confirmation.
+
+On an interrupted upload, the remote `upload.lock` intentionally remains. Pause
+the importer cron, ensure no uploader is running, and inspect the private inbox.
+If old READY/catalog are intact, remove only temporary `.uploading` files and the
+empty `upload.lock`, then retry with the same confirmed parent. If the final pair
+is incomplete, remove READY, restore a complete verified pair manually (READY
+last), clean temporary files, and remove the empty lock. If the new final pair is
+already intact, clean temporary files and the lock, resume cron, and confirm import
+before uploading again. Never delete release history or reset SQL release state.
+Use `rmdir`/delete-empty-directory for the lock, never recursive application cleanup.
+
+The local uploader requires its first hosted rehearsal. Production deployment remains
+unsupported. After each successful import, run the website repository's read-only
+verifier against the exact bundle and check repeat-import safety.
 
 ## Production service cutover — not implemented
 
