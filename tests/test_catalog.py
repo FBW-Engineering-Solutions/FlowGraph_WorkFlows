@@ -258,7 +258,7 @@ class ImportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             make_entry(root)
-            with patch('import_public_catalog.urlopen') as network:
+            with patch('import_public_catalog.build_opener') as network:
                 with self.assertRaisesRegex(InvalidCatalog, 'refusing to overwrite'):
                     import_catalog(root)
                 network.assert_not_called()
@@ -297,12 +297,39 @@ class ImportTests(unittest.TestCase):
 
     def test_rate_limit_respects_retry_after(self):
         error = HTTPError(BASE + 'api.php', 429, 'rate limit', {'Retry-After': '120'}, None)
-        with patch('import_public_catalog.urlopen', side_effect=[error, RuntimeError('stop')]), \
+        with patch('import_public_catalog.build_opener') as opener, \
              patch('import_public_catalog.time.sleep') as sleep, \
              patch('builtins.print'):
+            opener.return_value.open.side_effect = [error, RuntimeError('stop')]
             with self.assertRaisesRegex(RuntimeError, 'stop'):
-                fetch('api.php')
+                fetch('api.php?page=1')
             sleep.assert_any_call(120)
+
+    def test_public_transport_is_get_only_and_refuses_unsafe_endpoints(self):
+        from email.message import Message
+        headers = Message()
+        headers['Content-Type'] = 'application/json'
+        with patch('import_public_catalog.build_opener') as opener, patch('import_public_catalog.time.sleep'):
+            response = opener.return_value.open.return_value.__enter__.return_value
+            response.status = 200
+            response.headers = headers
+            response.read.return_value = b'{}'
+            self.assertEqual(fetch('api.php?page=1'), b'{}')
+            request = opener.return_value.open.call_args.args[0]
+            self.assertEqual(request.get_method(), 'GET')
+            self.assertIsNone(request.data)
+            self.assertEqual(request.full_url, BASE + 'api.php?page=1')
+            for path in ['https://other.example/', '../.env', 'upload.php?id=1', 'api.php?page=0']:
+                with self.assertRaises(InvalidCatalog):
+                    fetch(path)
+
+    def test_public_transport_refuses_redirects_and_malformed_envelopes(self):
+        from import_public_catalog import NoRedirect, api
+        self.assertIsNone(NoRedirect().redirect_request(None, None, 302, '', {}, 'https://other.example/'))
+        for raw in [b'[]', b'null', b'{', b'{"schema_version":true}']:
+            with patch('import_public_catalog.fetch', return_value=raw):
+                with self.assertRaises((InvalidCatalog, ValueError)):
+                    api('api.php?page=1')
 
 
 if __name__ == '__main__':

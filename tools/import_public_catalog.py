@@ -11,7 +11,7 @@ import tempfile
 import time
 import unicodedata
 from urllib.error import HTTPError
-from urllib.request import urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from validate_catalog import MAX_BYTES, ROOT, InvalidCatalog, require, validate_catalog
 
@@ -19,13 +19,21 @@ from validate_catalog import MAX_BYTES, ROOT, InvalidCatalog, require, validate_
 BASE = 'https://flowgraph-catalog.fbw-es.com/workflows/'
 
 
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def fetch(endpoint):
+    require(re.fullmatch(r'(?:api|download)\.php\?(?:page|id)=[1-9][0-9]*', endpoint), 'unsafe public endpoint')
     # Respect the public service's rate limits instead of issuing a burst of reads.
     for attempt in range(5):
         time.sleep(2)
         try:
-            with urlopen(BASE + endpoint, timeout=30) as response:
-                require(response.geturl().startswith(BASE), 'unexpected redirect away from catalog')
+            request = Request(BASE + endpoint, headers={'Accept-Encoding': 'identity'}, method='GET')
+            with build_opener(NoRedirect()).open(request, timeout=30) as response:
+                require(response.status == 200 and response.headers.get_content_type() == 'application/json',
+                        'unexpected public response status or content type')
                 data = response.read(8 * MAX_BYTES + 1)
                 require(len(data) <= 8 * MAX_BYTES, 'catalog response is too large')
                 return data
@@ -41,7 +49,7 @@ def fetch(endpoint):
 
 def api(endpoint):
     payload = json.loads(fetch(endpoint))
-    require(payload.get('format') == 'flowgraph-workflow-catalog'
+    require(isinstance(payload, dict) and payload.get('format') == 'flowgraph-workflow-catalog'
             and payload.get('schema_version') == 1, 'unsupported public API response')
     return payload
 

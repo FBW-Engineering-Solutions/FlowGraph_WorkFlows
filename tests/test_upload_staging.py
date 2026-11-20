@@ -1,4 +1,5 @@
 import hashlib
+import base64
 import json
 import os
 from pathlib import Path
@@ -9,7 +10,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from upload_staging import INBOX, main, publish, quote, validate_bundle
+from upload_staging import INBOX, PRODUCTION_INBOX, main, publish, quote, validate_bundle
 from validate_catalog import InvalidCatalog
 
 
@@ -42,6 +43,8 @@ class UploadTests(unittest.TestCase):
             parts = shlex.split(command)
             operation, *args = parts
             if operation == 'mkdir':
+                if args == ['pending']:
+                    continue
                 if self.lock:
                     raise InvalidCatalog('upload locked')
                 self.lock = True
@@ -183,6 +186,46 @@ class UploadTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 main()
             password.assert_not_called()
+
+    def test_production_initial_upload_publishes_marker_last(self):
+        self.raw = json.dumps({'format': 'flowgraph-catalog-release', 'schema_version': 1,
+                               'previous_release': None, 'entries': []}).encode()
+        self.identity = hashlib.sha256(self.raw).hexdigest()
+        (self.bundle / 'catalog.json').write_bytes(self.raw)
+        (self.bundle / 'READY').write_text(self.identity + '\n')
+        self.files = {}
+        self.assertEqual(publish(self.bundle, None, self.session, self.work, PRODUCTION_INBOX), self.identity)
+        self.assertEqual(self.files, {'READY': (self.identity + '\n').encode(), 'catalog.json': self.raw})
+        self.assertTrue(self.commands[0].endswith('"' + PRODUCTION_INBOX + '"'))
+        self.assertEqual(self.commands[-3], 'rename READY.uploading READY')
+        self.assertFalse(self.lock)
+
+    def test_production_refuses_unverified_fingerprint_before_password(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(sys, 'argv', self.arguments()), \
+                patch('upload_staging.getpass.getpass') as password, \
+                patch('upload_staging.subprocess.run') as execute:
+            with self.assertRaises(SystemExit):
+                main('production')
+            password.assert_not_called()
+            execute.assert_not_called()
+
+    def test_production_incremental_stays_in_production(self):
+        publish(self.bundle, self.parent, self.session, self.work, PRODUCTION_INBOX)
+        self.assertFalse(any(INBOX in command for command in self.commands))
+        self.assertTrue(any(PRODUCTION_INBOX in command for command in self.commands))
+
+    def test_production_dry_run_never_prompts_or_connects(self):
+        arguments = self.arguments('--dry-run')
+        key = b'production-test-key'
+        (self.root / 'known_hosts').write_text('ftp.cluster129.hosting.ovh.net ssh-ed25519 ' + base64.b64encode(key).decode() + '\n')
+        fingerprint = 'SHA256:' + base64.b64encode(hashlib.sha256(key).digest()).decode().rstrip('=')
+        with patch.dict(os.environ, {}, clear=True), patch.object(sys, 'argv', arguments), \
+                patch('upload_staging.HOST_FINGERPRINT', fingerprint), \
+                patch('upload_staging.getpass.getpass') as password, \
+                patch('upload_staging.subprocess.run') as execute:
+            main('production')
+            password.assert_not_called()
+            execute.assert_not_called()
 
 
 if __name__ == '__main__':

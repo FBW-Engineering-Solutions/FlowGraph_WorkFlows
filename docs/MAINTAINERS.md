@@ -1,3 +1,33 @@
+# Production preparation (not cutover approval)
+
+Read-only reconciliation:
+
+```sh
+python3 /home/fbw/repos/FlowGraph/FlowGraph_Workflows/tools/preflight_production.py \
+  --output /tmp/flowgraph-production-preflight-NEW.json \
+  --baseline-commit bfa98a52b285124424cb42232a9de9abe1579e57
+```
+
+Exit 0 means exact public-content adoption comparison, 2 means reconciliation is
+required, 1 means collection/validation failed. Reports do not include account data,
+workflow bodies or descriptions, and cannot prove private database/schema readiness.
+The two listings detect revision changes but do not replace a final publishing freeze.
+Reports never authorize deployment. Production schema evidence and cutover ordering
+are in the website repository's `catalog-app/PRODUCTION-CUTOVER.md`.
+
+`tools/upload_production.py` is a separate **local interactive** command, not a CI
+workflow. Use `--previous-release NONE` only for an approved initial null-parent
+bundle into an inbox with no `pending` directory. Subsequent bundles require the
+production release parent, never staging's. The fixed SFTP path is
+`/home/fbwescj/flowgraph-catalog/storage/app/private/catalog-inbox`; verify hosting
+mapping privately first. `--dry-run` validates without connecting. Production
+requires the single verified ED25519 key with fingerprint
+`SHA256:xhieLplnoEvvl7+a8sq8wLCh/bvOQvQFIVewi+fK2og`, typed full destination/release
+confirmation, and a private password prompt. No credentials belong in Actions.
+Interrupted uploads retain `upload.lock`; investigate before retrying. Upload
+success does not prove database import. The server needs explicit production opt-in,
+publishing disabled, an exact release pin, and an independently reviewed CLI run.
+
 # Maintainer notes
 
 Contributors only need the README and CONTRIBUTING.md. This document collects
