@@ -2,6 +2,7 @@
 """Publish a release to the fixed staging inbox using OpenSSH SFTP only."""
 
 import argparse
+import base64
 import getpass
 import hashlib
 import json
@@ -17,6 +18,8 @@ from validate_catalog import InvalidCatalog, require
 
 HOST = 'ftp.cluster129.hosting.ovh.net'
 INBOX = '/home/fbwescj/catalog-staging/storage/app/private/catalog-inbox'
+PRODUCTION_INBOX = '/home/fbwescj/flowgraph-catalog/storage/app/private/catalog-inbox'
+HOST_FINGERPRINT = 'SHA256:xhieLplnoEvvl7+a8sq8wLCh/bvOQvQFIVewi+fK2og'
 
 
 def quote(value):
@@ -26,7 +29,7 @@ def quote(value):
 
 
 def validate_bundle(bundle, previous):
-    require(re.fullmatch(r'[a-f0-9]{64}', previous), 'invalid previous release')
+    require(previous is None or re.fullmatch(r'[a-f0-9]{64}', previous), 'invalid previous release')
     require(bundle.is_dir() and not bundle.is_symlink(), 'unsafe bundle directory')
     for name, limit in [('catalog.json', 16777216), ('READY', 65)]:
         path = bundle / name
@@ -42,34 +45,40 @@ def validate_bundle(bundle, previous):
     return identity
 
 
-def publish(bundle, previous, session, work):
+def publish(bundle, previous, session, work, inbox=INBOX):
     """session executes a fail-fast batch; any failure leaves the upload lock for recovery."""
     identity = validate_bundle(bundle, previous)
     # Missing inbox/pending must be created and checked manually during first setup.
     # mkdir fails if another uploader holds this lock or an interrupted upload needs repair.
-    session(['cd ' + quote(INBOX), 'mkdir upload.lock', 'cd pending',
-             'get READY ' + quote(str(work / 'remote-READY'))])
-    require((work / 'remote-READY').read_bytes() in ((previous + '\n').encode(), (identity + '\n').encode()),
-            'remote pending marker is neither parent nor this release; inspect upload.lock')
-    session(['cd ' + quote(INBOX + '/pending'), '-rm catalog.json.uploading',
+    require(inbox in (INBOX, PRODUCTION_INBOX) and (previous is not None or inbox == PRODUCTION_INBOX),
+            'initial upload is production-only')
+    if previous is None:
+        # Fails closed if pending exists: inspect it, never guess whether it was imported.
+        session(['cd ' + quote(inbox), 'mkdir upload.lock', 'mkdir pending'])
+    else:
+        session(['cd ' + quote(inbox), 'mkdir upload.lock', 'cd pending',
+                 'get READY ' + quote(str(work / 'remote-READY'))])
+        require((work / 'remote-READY').read_bytes() in ((previous + '\n').encode(), (identity + '\n').encode()),
+                'remote pending marker is neither parent nor this release; inspect upload.lock')
+    session(['cd ' + quote(inbox + '/pending'), '-rm catalog.json.uploading',
              'put ' + quote(str(bundle / 'catalog.json')) + ' catalog.json.uploading',
              'get catalog.json.uploading ' + quote(str(work / 'roundtrip.json'))])
     require(hashlib.sha256((work / 'roundtrip.json').read_bytes()).hexdigest() == identity,
             'remote payload round-trip checksum mismatch; inspect upload.lock')
     # Stage the marker before removing the old one. Cron can only read an old valid
     # pair, a missing marker, or the newly verified pair. Never upload over READY.
-    session(['cd ' + quote(INBOX + '/pending'), '-rm READY.uploading',
+    session(['cd ' + quote(inbox + '/pending'), '-rm READY.uploading',
              'put ' + quote(str(bundle / 'READY')) + ' READY.uploading',
              'get READY.uploading ' + quote(str(work / 'roundtrip-READY'))])
     require((work / 'roundtrip-READY').read_bytes() == (identity + '\n').encode(),
             'remote marker round-trip mismatch; inspect upload.lock')
-    session(['cd ' + quote(INBOX + '/pending'),
-             'rm READY', 'rm catalog.json', 'rename catalog.json.uploading catalog.json',
+    session(['cd ' + quote(inbox + '/pending'),
+             *([] if previous is None else ['rm READY', 'rm catalog.json']), 'rename catalog.json.uploading catalog.json',
              'rename READY.uploading READY', 'cd ..', 'rmdir upload.lock'])
     return identity
 
 
-def main():
+def main(target='staging'):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--bundle', type=Path, required=True)
     parser.add_argument('--previous-release', required=True)
@@ -78,8 +87,12 @@ def main():
     parser.add_argument('--dry-run', action='store_true', help='Validate and display destination without connecting')
     args = parser.parse_args()
     try:
+        require(target in ('staging', 'production'), 'invalid destination')
+        production = target == 'production'
+        previous = None if production and args.previous_release == 'NONE' else args.previous_release
+        require(production or previous is not None, 'staging requires a parent')
         require(not os.environ.get('CI') and not os.environ.get('GITHUB_ACTIONS'), 'local deployment only; CI is refused')
-        identity = validate_bundle(args.bundle, args.previous_release)
+        identity = validate_bundle(args.bundle, previous)
         username = args.username
         require(bool(re.fullmatch(r'[A-Za-z0-9_-]+', username)), 'invalid SFTP username')
         require(args.known_hosts.is_file() and not args.known_hosts.is_symlink()
@@ -88,14 +101,22 @@ def main():
         require(any(len(line.split()) >= 3 and line.split()[0] == HOST
                     for line in hostkeys.splitlines() if line.strip() and not line.startswith('#')),
                 'known_hosts must contain the verified staging host key')
-        print(f'STAGING ONLY: {HOST}:22{INBOX}/pending\nRelease: {identity}\nParent: {args.previous_release}')
+        if production:
+            keys = [line.split() for line in hostkeys.splitlines() if line.strip() and not line.startswith('#')]
+            require(len(keys) == 1 and len(keys[0]) == 3 and keys[0][:2] == [HOST, 'ssh-ed25519'],
+                    'production requires the single verified ED25519 host key')
+            fingerprint = 'SHA256:' + base64.b64encode(hashlib.sha256(base64.b64decode(keys[0][2], validate=True)).digest()).decode().rstrip('=')
+            require(fingerprint == HOST_FINGERPRINT, 'production host fingerprint mismatch')
+        inbox = PRODUCTION_INBOX if production else INBOX
+        print(f'{target.upper()} ONLY: {HOST}:22{inbox}/pending\nRelease: {identity}\nParent: {args.previous_release}')
         if args.dry_run:
             print('Dry run: no connection or password prompt. Hosting credentials remain local.')
             return
         require(sys.stdin.isatty(), 'run from an interactive local terminal')
-        confirmation = 'catalog-staging:' + identity
+        confirmation = ('flowgraph-catalog.fbw-es.com:' + PRODUCTION_INBOX + '/pending:' + identity
+                        if production else 'catalog-staging:' + identity)
         require(input('Confirm backup and parent import; type '+confirmation+': ') == confirmation,
-                'staging confirmation did not match')
+                'destination confirmation did not match')
         password = getpass.getpass('Hosting SFTP password (not saved): ')
         require(bool(password) and '\n' not in password and '\r' not in password, 'invalid password')
         with tempfile.TemporaryDirectory(prefix='catalog-sftp-') as temporary:
@@ -123,10 +144,10 @@ def main():
                     stderr=subprocess.PIPE, timeout=180)
                 require(result.returncode == 0, 'SFTP failed; inspect credentials, pin, permissions and upload.lock privately')
 
-            identity = publish(args.bundle, args.previous_release, session, work)
-        print('Uploaded staging bundle ' + identity + '. Database import is NOT yet confirmed; inspect cron logs.')
+            identity = publish(args.bundle, previous, session, work, inbox)
+        print('Uploaded '+target+' bundle ' + identity + '. Database import is NOT yet confirmed; inspect private execution logs.')
     except (InvalidCatalog, OSError, EOFError, ValueError, subprocess.SubprocessError):
-        parser.exit(1, 'Staging upload stopped. Do not delete release state. Inspect the inbox and upload.lock before retrying; no database import was confirmed.\n')
+        parser.exit(1, target.title()+' upload stopped. Do not delete release state. Inspect the inbox and upload.lock before retrying; no database import was confirmed.\n')
 
 
 if __name__ == '__main__':

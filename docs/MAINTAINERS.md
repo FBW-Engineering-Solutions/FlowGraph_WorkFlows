@@ -1,3 +1,57 @@
+# Verified production state — November 21, 2026
+
+Production adoption and the subsequent reviewed ID 2 units clarification are complete.
+The exact current production release is:
+
+```text
+877ef9a006cc8c1fed7eabf470b2c7b59d98fd817f5f13cf54d56f9903a30442
+```
+
+Its production parent is
+`4fa6bf99ae9d463ab0bbd6acbcfcd6afaec79dc1e96e2069bfb06a98b16ec8a4`.
+Production SQL evidence confirmed 2 releases, 12 managed entries, 12 workflows,
+2 accounts, 12 ownership links and 0 invalid checksums. Post-import GET-only
+verification matched all 12 IDs, metadata, filenames and exact download bytes.
+Only ID 2's description changed in the incremental release; all workflow bytes
+were unchanged. Preserve source commits `797aea3` and `63919fe` in merged history;
+deployed payloads reference those commits. Do not squash them away.
+
+Production publishing/import gates should remain disabled and apply/dry-run crons
+paused between controlled releases. Keep production and staging histories independent.
+Use the release above as the next production parent, but reconfirm the database state
+before uploading. Git merge/CI is validation only, not a hosting deployment trigger.
+The website repository's `catalog-app/PRODUCTION-CUTOVER.md` records the cutover.
+
+## Production preparation (historical procedure, not new cutover approval)
+
+Read-only reconciliation:
+
+```sh
+python3 /home/fbw/repos/FlowGraph/FlowGraph_Workflows/tools/preflight_production.py \
+  --output /tmp/flowgraph-production-preflight-NEW.json \
+  --baseline-commit bfa98a52b285124424cb42232a9de9abe1579e57
+```
+
+Exit 0 means exact public-content adoption comparison, 2 means reconciliation is
+required, 1 means collection/validation failed. Reports do not include account data,
+workflow bodies or descriptions, and cannot prove private database/schema readiness.
+The two listings detect revision changes but do not replace a final publishing freeze.
+Reports never authorize deployment. Production schema evidence and cutover ordering
+are in the website repository's `catalog-app/PRODUCTION-CUTOVER.md`.
+
+`tools/upload_production.py` is a separate **local interactive** command, not a CI
+workflow. Use `--previous-release NONE` only for an approved initial null-parent
+bundle into an inbox with no `pending` directory. Subsequent bundles require the
+production release parent, never staging's. The fixed SFTP path is
+`/home/fbwescj/flowgraph-catalog/storage/app/private/catalog-inbox`; verify hosting
+mapping privately first. `--dry-run` validates without connecting. Production
+requires the single verified ED25519 key with fingerprint
+`SHA256:xhieLplnoEvvl7+a8sq8wLCh/bvOQvQFIVewi+fK2og`, typed full destination/release
+confirmation, and a private password prompt. No credentials belong in Actions.
+Interrupted uploads retain `upload.lock`; investigate before retrying. Upload
+success does not prove database import. The server needs explicit production opt-in,
+publishing disabled, an exact release pin, and an independently reviewed CLI run.
+
 # Maintainer notes
 
 Contributors only need the README and CONTRIBUTING.md. This document collects
