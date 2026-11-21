@@ -1,4 +1,28 @@
-# Production preparation (not cutover approval)
+# Verified production state — November 21, 2026
+
+Production adoption and the subsequent reviewed ID 2 units clarification are complete.
+The exact current production release is:
+
+```text
+877ef9a006cc8c1fed7eabf470b2c7b59d98fd817f5f13cf54d56f9903a30442
+```
+
+Its production parent is
+`4fa6bf99ae9d463ab0bbd6acbcfcd6afaec79dc1e96e2069bfb06a98b16ec8a4`.
+Production SQL evidence confirmed 2 releases, 12 managed entries, 12 workflows,
+2 accounts, 12 ownership links and 0 invalid checksums. Post-import GET-only
+verification matched all 12 IDs, metadata, filenames and exact download bytes.
+Only ID 2's description changed in the incremental release; all workflow bytes
+were unchanged. Preserve source commits `797aea3` and `63919fe` in merged history;
+deployed payloads reference those commits. Do not squash them away.
+
+Production publishing/import gates should remain disabled and apply/dry-run crons
+paused between controlled releases. Keep production and staging histories independent.
+Use the release above as the next production parent, but reconfirm the database state
+before uploading. Git merge/CI is validation only, not a hosting deployment trigger.
+The website repository's `catalog-app/PRODUCTION-CUTOVER.md` records the cutover.
+
+## Production preparation (historical procedure, not new cutover approval)
 
 Read-only reconciliation:
 
