@@ -1,0 +1,419 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "read-image-0",
+      "definition_id": "read-image",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/heaviside_00.jpg"
+      },
+      "position": {
+        "x": -415.62271337950176,
+        "y": -97.81119522666037
+      }
+    },
+    {
+      "id": "read-image-1",
+      "definition_id": "read-image",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/heaviside_01.jpg"
+      },
+      "position": {
+        "x": -444.5387237158226,
+        "y": 711.4479882430339
+      }
+    },
+    {
+      "id": "user-function",
+      "definition_id": "user-function",
+      "parameters": {
+        "code": [
+          "",
+          "import numpy as np",
+          "import pyxel as px",
+          "from flowgraph.domain.mesh_document import  MeshDocument",
+          "",
+          "def Execute(image_reff, image_def, elementSize:int, regulLength: int, removeRigid:bool, zone) ->tuple[MeshDocument]:",
+          "",
+          "    f = px.Image('image_reff')",
+          "    f.pix = np.asarray(image_reff).astype(float)",
+          "    if len(f.pix.shape) == 3:",
+          "        f.ToGray()",
+          "    #f.Plot()",
+          "    g = px.Image('image_def')",
+          "    g.pix = np.asarray(image_def).astype(float)",
+          "    if len(g.pix.shape) == 3:",
+          "        g.ToGray()",
+          "    #g.Plot()",
+          "    ",
+          "    roi = np.array(zone)",
+          "    import Muscat.MeshContainers.ElementsDescription as ED",
+          "    typel = {3: ED.Quadrangle_4,2: ED.Triangle_3,9: ED.Triangle_6,16: ED.Quadrangle_8,10: ED.Quadrangle_9}",
+          "    print(\"----------------------------\")",
+          "    print(roi)",
+          "    print(elementSize)",
+          "    m, cam = px.MeshFromROI(roi, elementSize, typel=2)",
+          "    U, res = px.Correlate(f, g, m, cam)",
+          "",
+          "    from Muscat.MeshTools.MeshCreationTools import CreateMeshFromCellsDict",
+          "    ",
+          "",
+          "    connectivity=  { typel[t]:m.e[t] for t in m.e.keys() }",
+          "    outputmesh = CreateMeshFromCellsDict(points = np.ascontiguousarray(m.n), cellsDict = connectivity)",
+          "    #U = U.copy().reshape(-1, 2)",
+          "    print(outputmesh)",
+          "    print(outputmesh.ComputeBoundingBox())",
+          "    print(U.shape)",
+          "    n = len(U)//2",
+          "    outputmesh.nodeFields[\"U0\"] =U[:n]",
+          "    outputmesh.nodeFields[\"U1\"] =U[n:]",
+          "    outputmesh.nodeFields[\"U\"] =np.column_stack((U[:n],U[n:], np.zeros(n)))",
+          "    ",
+          "    ",
+          "    return (MeshDocument(outputmesh),)",
+          ""
+        ],
+        "__user_input__elementSize": 25,
+        "__user_input__regulLength": 5,
+        "__user_input__removeRigid": true
+      },
+      "position": {
+        "x": 980.6976214486347,
+        "y": 469.42556630603247
+      },
+      "size": {
+        "width": 1000,
+        "height": 550
+      }
+    },
+    {
+      "id": "mesh-sink",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "[\"fields\",\"U0\"]",
+        "show_representation": true,
+        "show_axis_grid": false,
+        "show_edges": false
+      },
+      "position": {
+        "x": 2167.5373899837064,
+        "y": 360.47128539273814
+      }
+    },
+    {
+      "id": "transfer-fields",
+      "definition_id": "transfer-fields",
+      "parameters": {
+        "transferNodeData": true,
+        "transferElementData": false,
+        "transferNodeTags": false,
+        "transferElementTags": false,
+        "method": "Interp/Clamp"
+      },
+      "position": {
+        "x": 1560.175003653321,
+        "y": -384.69949315959576
+      }
+    },
+    {
+      "id": "create-uniform-mesh-of-bars",
+      "definition_id": "create-uniform-mesh-of-bars",
+      "parameters": {
+        "startPoint": [
+          100,
+          -501,
+          0
+        ],
+        "stopPoint": [
+          900,
+          -501,
+          0
+        ],
+        "nbPoints": 500,
+        "secondOrder": false
+      },
+      "position": {
+        "x": 927.1035570531342,
+        "y": -380.55182942083593
+      }
+    },
+    {
+      "id": "mesh-to-table",
+      "definition_id": "mesh-to-table",
+      "parameters": {
+        "entity": "node"
+      },
+      "position": {
+        "x": 1571.856219023179,
+        "y": 26.854874811242098
+      }
+    },
+    {
+      "id": "plot-table",
+      "definition_id": "plot-table",
+      "parameters": {},
+      "position": {
+        "x": 2178.9266140917666,
+        "y": -382.6331537252087
+      }
+    },
+    {
+      "id": "workspace-file-1",
+      "definition_id": "workspace-file",
+      "parameters": {
+        "file name": "heaviside_01.jpg"
+      },
+      "position": {
+        "x": -435.4701552376972,
+        "y": 496.2494972873146
+      }
+    },
+    {
+      "id": "workspace-file-0",
+      "definition_id": "workspace-file",
+      "parameters": {
+        "file name": "heaviside_00.jpg"
+      },
+      "position": {
+        "x": -408.5541449013764,
+        "y": -357.61270427094104
+      }
+    },
+    {
+      "id": "image-roi-1",
+      "definition_id": "image-roi",
+      "parameters": {
+        "corner1": [
+          133,
+          72
+        ],
+        "corner2": [
+          764,
+          772
+        ]
+      },
+      "position": {
+        "x": 206.40674670998914,
+        "y": 473.0124003883109
+      }
+    },
+    {
+      "id": "image-loi-0",
+      "definition_id": "image-loi",
+      "parameters": {
+        "corner1": [
+          114,
+          275
+        ],
+        "corner2": [
+          878,
+          333
+        ],
+        "negate_y": true
+      },
+      "position": {
+        "x": 204.65976723989672,
+        "y": -359.2573689562017
+      }
+    },
+    {
+      "id": "title-doc-13",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "DIC by pyxel (https://github.com/jcpassieux/pyxel)"
+      },
+      "position": {
+        "x": 925.4349703040341,
+        "y": -800.9146431373362
+      }
+    },
+    {
+      "id": "paragraph-doc-14",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Define files to be loaded"
+      },
+      "position": {
+        "x": -388.7614282638739,
+        "y": -538.8107463085202
+      }
+    },
+    {
+      "id": "paragraph-doc-14-2",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# View & Select \n\n- View loaded images\n- Define the ROI for the DIC (bottom view)\n- Define the data extraction line (top view)\n"
+      },
+      "position": {
+        "x": 208.63799418670652,
+        "y": -548.6305653065917
+      }
+    },
+    {
+      "id": "paragraph-doc-14-3",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Mesh Creation for the extraction"
+      },
+      "position": {
+        "x": 929.0334842653347,
+        "y": -517.6972733172815
+      }
+    },
+    {
+      "id": "paragraph-doc-14-4",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Core DIc algorithm using pyxel-dic \n\nmore information in https://github.com/jcpassieux/pyxel\n\nThis is a WIP version."
+      },
+      "position": {
+        "x": 987.7443854639771,
+        "y": 300.00883985392
+      }
+    },
+    {
+      "id": "paragraph-doc-14-5",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Transfer (mapping) of the data from the dic into the line. "
+      },
+      "position": {
+        "x": 1550.4192906561755,
+        "y": -529.5849594351403
+      }
+    },
+    {
+      "id": "paragraph-doc-14-6",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Output \n\n- (top) Extracted data using the line\n- (bottom) Raw mesh visualisation"
+      },
+      "position": {
+        "x": 2168.9010206000266,
+        "y": -530.5142872491945
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Optional output into a file\n\nConnect a writer to export the data into a file\n\n- A Write Table to export a csv\n- A Write Mesh to export a mesh file for desktop visualisation (i.e. ParaView)"
+      },
+      "position": {
+        "x": 2893.423110813045,
+        "y": -546.2123048186515
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# On Browser Execution\n\nMount a local directory containing the images to treat"
+      },
+      "position": {
+        "x": -390.8779623237946,
+        "y": -963.3176201678431
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7-copy-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Local Python backend\n\nIf faster or more memory is required, This workflow can be executed using a native python backend.\n\nRun the flowgraph backend in your terminal using. Don't forget to set the workspace_folder:\n\n```bash\nuvx --with pyxel-dic --python 3.14 flowgraph serve --workspace workspace_folder/\n```\n\n\nThen go to the menu Run->Python Backend... and set the Python server with the token printed in you console.\n"
+      },
+      "position": {
+        "x": -390.998224771017,
+        "y": -851.1883628226394
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "read-image-1",
+      "source_port": "image",
+      "target_node": "user-function",
+      "target_port": "image_def"
+    },
+    {
+      "source_node": "read-image-0",
+      "source_port": "image",
+      "target_node": "user-function",
+      "target_port": "image_reff"
+    },
+    {
+      "source_node": "user-function",
+      "source_port": "output1",
+      "target_node": "mesh-sink",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "user-function",
+      "source_port": "output1",
+      "target_node": "transfer-fields",
+      "target_port": "source_data"
+    },
+    {
+      "source_node": "create-uniform-mesh-of-bars",
+      "source_port": "mesh",
+      "target_node": "transfer-fields",
+      "target_port": "target"
+    },
+    {
+      "source_node": "transfer-fields",
+      "source_port": "mesh_document",
+      "target_node": "mesh-to-table",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "mesh-to-table",
+      "source_port": "table",
+      "target_node": "plot-table",
+      "target_port": "table"
+    },
+    {
+      "source_node": "workspace-file-1",
+      "source_port": "path",
+      "target_node": "read-image-1",
+      "target_port": "path"
+    },
+    {
+      "source_node": "workspace-file-0",
+      "source_port": "path",
+      "target_node": "read-image-0",
+      "target_port": "path"
+    },
+    {
+      "source_node": "read-image-1",
+      "source_port": "image",
+      "target_node": "image-roi-1",
+      "target_port": "input"
+    },
+    {
+      "source_node": "image-roi-1",
+      "source_port": "roi",
+      "target_node": "user-function",
+      "target_port": "zone"
+    },
+    {
+      "source_node": "read-image-0",
+      "source_port": "image",
+      "target_node": "image-loi-0",
+      "target_port": "input"
+    },
+    {
+      "source_node": "image-loi-0",
+      "source_port": "point2",
+      "target_node": "create-uniform-mesh-of-bars",
+      "target_port": "stopPoint"
+    },
+    {
+      "source_node": "image-loi-0",
+      "source_port": "point1",
+      "target_node": "create-uniform-mesh-of-bars",
+      "target_port": "startPoint"
+    }
+  ]
+}
