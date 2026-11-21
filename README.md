@@ -44,5 +44,12 @@ The workflows, descriptions, documentation, and repository tools are licensed un
 **BSD-3-Clause**; see **LICENSE**. FlowGraph and any external libraries, datasets,
 and tools have their own licenses. Referenced sample files are not distributed here.
 
-**Service status:** automatic publication to the website is not connected yet.
-Migration and CI details are in **docs/MAINTAINERS.md**.
+## Publish an approved change (maintainers)
+
+After the PR is merged, run `make release-production` from a clean `master`
+checkout. It tests, uploads, waits for the private scheduled importer and verifies
+the live catalog. It prompts for the hosting password; no per-release settings
+or cron changes are needed after the one-time setup.
+
+See **docs/RELEASING.md** for the short instructions and troubleshooting.
+Hosting setup, migration history and CI details are in **docs/MAINTAINERS.md**.
