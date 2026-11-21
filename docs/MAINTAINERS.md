@@ -16,11 +16,81 @@ Only ID 2's description changed in the incremental release; all workflow bytes
 were unchanged. Preserve source commits `797aea3` and `63919fe` in merged history;
 deployed payloads reference those commits. Do not squash them away.
 
-Production publishing/import gates should remain disabled and apply/dry-run crons
-paused between controlled releases. Keep production and staging histories independent.
-Use the release above as the next production parent, but reconfirm the database state
-before uploading. Git merge/CI is validation only, not a hosting deployment trigger.
+The cutover originally rested with both publishing/import gates disabled and jobs
+paused. The optional scheduled mode below replaces that resting policy when enabled:
+publishing stays disabled, the import gates stay enabled and only the sync cron runs.
+Keep production and staging histories independent. The release above is a historical
+checkpoint, not a permanent parent setting; Make reads the private database receipt.
+Git merge/CI is validation only, not a hosting deployment trigger.
 The website repository's `catalog-app/PRODUCTION-CUTOVER.md` records the cutover.
+
+## One-command scheduled production release
+
+**For normal releases, follow the short checklist in `RELEASING.md`.** The details
+below are for one-time hosting setup and troubleshooting, not steps to repeat.
+
+This opt-in operating mode supersedes the historical paused-job procedure below
+only after the website's scheduled-sync implementation has been deployed and the
+one-time setup completed. No hosting change is made merely by merging this code.
+
+### One-time setup
+
+1. Deploy the companion website implementation, including the CLI-only
+   `catalog-production-sync.php` and `SyncProductionCatalog` command. No SQL upgrade
+   is required. Preserve private backups and the already adopted release history.
+2. In the private production environment, keep `CATALOG_PUBLISHING_ENABLED=false`,
+   set `CATALOG_PRODUCTION_IMPORT_ENABLED=true` and
+   `CATALOG_PRODUCTION_SCHEDULED_IMPORT_ENABLED=true`. The old
+   `CATALOG_PRODUCTION_IMPORT_RELEASE` can remain unchanged: scheduled sync uses a
+   checksum-specific private approval instead. Refresh cached configuration if used.
+3. Configure one PHP 8.5 OVH task, no arguments, at
+   `/home/fbwescj/flowgraph-catalog/catalog-production-sync.php`.
+   Leave this task enabled; keep the old apply/dry-run tasks paused. Hourly is more
+   responsive; daily also works, but Make may wait until the next day's run.
+4. Let it run once and confirm its private receipt exists at
+   `storage/app/private/catalog-inbox/current-release.json`. It reads current SQL
+   state and performs no import without `APPROVED`. Never fabricate this receipt.
+5. Run `make setup-production` once to save the SFTP username and verified known-hosts
+   path in ignored `.local/production-release.json`. No password is saved.
+
+### Every release after the PR is merged
+
+From a clean `master` checkout of this repository:
+
+```sh
+make release-production
+```
+
+Only the SFTP password is prompted. No checksum, parent, environment edit or cron
+toggle is needed. Running this target is authorization to deploy the merged catalog.
+It fast-forwards `master` to fetched `origin/master`, rejects unpublished/divergent
+history, runs tests/validation, gets the production parent from the private receipt,
+builds and retains a deterministic bundle in `.local/releases/`, uploads with checksum
+round-trip/lock/READY safeguards, and publishes `APPROVED` last. It waits for the
+database receipt, then verifies public metadata, filenames and exact download bytes
+with paced requests. Server-assigned IDs for new entries come from the receipt.
+Documentation/tool-only changes do not cause a new catalog release.
+
+`make release-production-dry-run` reads the private receipt and builds locally but
+does not upload or approve. Unlike the old target, it connects to SFTP and prompts
+for the password. Its Git update and test checks still run.
+
+The scheduler uses the approval checksum as an in-memory pin, runs importer dry-run
+then apply with the original validation/parent/transaction safeguards, and atomically
+publishes a receipt from committed SQL. Repeats are safe; an arbitrary newly uploaded
+bundle is not authorization. This mode trusts the hosting SFTP account as a release
+approver; it is not protection against a compromised hosting account.
+
+The default wait is 25 hours for daily scheduling. You can adjust `wait_seconds`
+once in the ignored local profile (60–172800 seconds). A timeout or interrupted Make
+process does **not** cancel approval: the cron may still import later. Inspect the
+receipt and private logs before recovery. Keep automatic hosting/database backups
+configured separately; this tool does not export SQL. Public verification failure
+after import does not roll back an already committed release.
+
+For upload failures follow the lock-recovery instructions below, never blindly
+delete locks. To stop future scheduled writes, disable the scheduled-import gate
+and pause the sync task; do not delete SQL history or weaken parent checks.
 
 ## Production preparation (historical procedure, not new cutover approval)
 
