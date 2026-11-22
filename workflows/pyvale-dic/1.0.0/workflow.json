@@ -1,0 +1,468 @@
+{
+  "format": "flowgraph-workflow",
+  "version": 3,
+  "nodes": [
+    {
+      "id": "read-image-0",
+      "definition_id": "read-image",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/heaviside_00.jpg"
+      },
+      "position": {
+        "x": -415.62271337950176,
+        "y": -97.81119522666037
+      }
+    },
+    {
+      "id": "read-image-1",
+      "definition_id": "read-image",
+      "parameters": {
+        "path": "/tmp/flowgraph-user-data/heaviside_01.jpg"
+      },
+      "position": {
+        "x": -444.5387237158226,
+        "y": 711.4479882430339
+      }
+    },
+    {
+      "id": "user-function",
+      "definition_id": "user-function",
+      "parameters": {
+        "code": [
+          "import numpy as np",
+          "from pyvale import dic",
+          "from Muscat.MeshContainers import ElementsDescription as ED",
+          "from Muscat.MeshTools.MeshCreationTools import CreateMeshFromCellsDict",
+          "from flowgraph.domain.mesh_document import MeshDocument",
+          "",
+          "",
+          "def Execute(image_reff, image_def, subsetSize: int, subsetStep: int,",
+          "            maxDisplacement: int, threshold: float, zone) -> tuple[MeshDocument]:",
+          "    \"\"\"Correlate in pixel coordinates and return a negative-Y display mesh.\"\"\"",
+          "    def grayscale(image):",
+          "        pixels = np.asarray(image, dtype=np.float64)",
+          "        if pixels.ndim == 3 and pixels.shape[2] in (3, 4):",
+          "            pixels = pixels[:, :, :3] @ np.array([0.299, 0.587, 0.114])",
+          "        elif pixels.ndim == 3 and pixels.shape[2] == 1:",
+          "            pixels = pixels[:, :, 0]",
+          "        if pixels.ndim != 2 or not np.isfinite(pixels).all():",
+          "            raise ValueError('Images must be finite grayscale, RGB or RGBA arrays.')",
+          "        return np.ascontiguousarray(pixels)",
+          "",
+          "    reference, deformed = grayscale(image_reff), grayscale(image_def)",
+          "    if reference.shape != deformed.shape:",
+          "        raise ValueError('Reference and deformed images must have the same dimensions.')",
+          "    if type(subsetSize) is not int or subsetSize < 5 or subsetSize % 2 != 1:",
+          "        raise ValueError('subsetSize must be an odd integer of at least 5 pixels.')",
+          "    if type(subsetStep) is not int or subsetStep < 1:",
+          "        raise ValueError('subsetStep must be a positive integer.')",
+          "    if type(maxDisplacement) is not int or maxDisplacement < 1:",
+          "        raise ValueError('maxDisplacement must be a positive integer.')",
+          "    if not np.isfinite(threshold) or not 0 < threshold < 1:",
+          "        raise ValueError('threshold must lie strictly between 0 and 1.')",
+          "    corners = np.asarray(zone, dtype=float)",
+          "    if (corners.shape != (2, 2) or not np.isfinite(corners).all()",
+          "            or not np.equal(corners, np.floor(corners)).all()):",
+          "        raise ValueError('ROI must contain two integer (x, y) corners.')",
+          "    x0, y0 = corners.min(axis=0).astype(int)",
+          "    x1, y1 = corners.max(axis=0).astype(int)",
+          "    height, width = reference.shape",
+          "    if not (0 <= x0 < x1 < width and 0 <= y0 < y1 < height):",
+          "        raise ValueError('ROI corners must be distinct and inside the reference image.')",
+          "    if min(x1 - x0, y1 - y0) < subsetSize + 2 * subsetStep:",
+          "        raise ValueError('ROI is too small for a 2D mesh; enlarge it or reduce subsetSize/subsetStep.')",
+          "    if np.ptp(reference[y0:y1 + 1, x0:x1 + 1]) == 0:",
+          "        raise ValueError('The reference ROI has no intensity variation to correlate.')",
+          "    mask = np.zeros(reference.shape, dtype=bool)",
+          "    mask[y0:y1 + 1, x0:x1 + 1] = True",
+          "    # Image Y increases downward: bottom-left means small X and large Y.",
+          "    # Leave room for the subset, neighbours and pyvale's seed-grid snapping.",
+          "    inset = subsetSize // 2 + 2 * subsetStep",
+          "    seed_x = min(x0 + inset, (x0 + x1) // 2)",
+          "    seed_y = max(y1 - inset, (y0 + y1) // 2)",
+          "    results = dic.calculate_2d(",
+          "        reference=reference, deformed=deformed, roi_mask=mask,",
+          "        seed=[int(seed_x), int(seed_y)],",
+          "        subset_size=subsetSize, subset_step=subsetStep,",
+          "        max_displacement=maxDisplacement, threshold=float(threshold),",
+          "        correlation_criteria='ZNSSD', shape_function='AFFINE',",
+          "        layout='COLUMN', output_results=False, output_below_threshold=True,",
+          "        num_threads=1, print_level=0,",
+          "    )",
+          "    x, y = np.asarray(results.ss_x), np.asarray(results.ss_y)",
+          "    u, v = np.asarray(results.u_px[0]), np.asarray(results.v_px[0])",
+          "    cost = np.asarray(results.cost[0])",
+          "    valid = (np.asarray(results.converged[0], dtype=bool)",
+          "             & np.isfinite(u) & np.isfinite(v) & np.isfinite(cost)",
+          "             & (cost >= threshold))",
+          "    # Only connect adjacent subset centres with four valid corners. Never bridge",
+          "    # a failed subset with a Delaunay triangle or replace a failure with zero.",
+          "    lookup = {(int(px), int(py)): i for i, (px, py) in enumerate(zip(x, y)) if valid[i]}",
+          "    cells = []",
+          "    for (px, py), i in lookup.items():",
+          "        adjacent = [(px, py + subsetStep),",
+          "                    (px + subsetStep, py + subsetStep), (px + subsetStep, py)]",
+          "        if all(point in lookup for point in adjacent):",
+          "            cells.append([i] + [lookup[point] for point in adjacent])",
+          "    if not cells:",
+          "        raise ValueError('No valid 2D subset cells remain. Check texture, ROI and correlation settings.')",
+          "    cells = np.asarray(cells, dtype=np.int64)",
+          "    used, inverse = np.unique(cells, return_inverse=True)",
+          "    points = np.ascontiguousarray(np.column_stack((x[used], -y[used], np.zeros(len(used)))))",
+          "    mesh = CreateMeshFromCellsDict(",
+          "        points=points, cellsDict={ED.Quadrangle_4: np.ascontiguousarray(inverse.reshape(-1, 4))})",
+          "    # Negate vertical displacements too, so U is consistent with mesh geometry.",
+          "    mesh.nodeFields['U0'] = u[used].copy()",
+          "    mesh.nodeFields['U1'] = -v[used].copy()",
+          "    mesh.nodeFields['U'] = np.column_stack((u[used], -v[used], np.zeros(len(used))))",
+          "    mesh.nodeFields['v_image'] = v[used].copy()",
+          "    mesh.nodeFields['cost'] = cost[used].copy()",
+          "    mesh.nodeFields['converged'] = np.ones(len(used), dtype=float)",
+          "    print(f'pyvale: {valid.sum()}/{len(valid)} valid subsets; {len(cells)} mesh cells.')",
+          "    return (MeshDocument(mesh),)"
+        ],
+        "__user_input__subsetSize": 21,
+        "__user_input__subsetStep": 10,
+        "__user_input__maxDisplacement": 10,
+        "__user_input__threshold": 0.9
+      },
+      "position": {
+        "x": 980.6976214486347,
+        "y": 469.42556630603247
+      },
+      "size": {
+        "width": 1000,
+        "height": 550
+      }
+    },
+    {
+      "id": "mesh-sink",
+      "definition_id": "mesh-sink",
+      "parameters": {
+        "color_field": "[\"fields\",\"U0\"]",
+        "show_representation": true,
+        "show_axis_grid": false,
+        "show_edges": false
+      },
+      "position": {
+        "x": 2167.5373899837064,
+        "y": 360.47128539273814
+      }
+    },
+    {
+      "id": "transfer-fields",
+      "definition_id": "transfer-fields",
+      "parameters": {
+        "transferNodeData": true,
+        "transferElementData": false,
+        "transferNodeTags": false,
+        "transferElementTags": false,
+        "method": "Interp/Clamp"
+      },
+      "position": {
+        "x": 1560.175003653321,
+        "y": -384.69949315959576
+      }
+    },
+    {
+      "id": "create-uniform-mesh-of-bars",
+      "definition_id": "create-uniform-mesh-of-bars",
+      "parameters": {
+        "startPoint": [
+          100,
+          -501,
+          0
+        ],
+        "stopPoint": [
+          900,
+          -501,
+          0
+        ],
+        "nbPoints": 500,
+        "secondOrder": false
+      },
+      "position": {
+        "x": 927.1035570531342,
+        "y": -380.55182942083593
+      }
+    },
+    {
+      "id": "mesh-to-table",
+      "definition_id": "mesh-to-table",
+      "parameters": {
+        "entity": "node"
+      },
+      "position": {
+        "x": 1571.856219023179,
+        "y": 26.854874811242098
+      }
+    },
+    {
+      "id": "plot-table",
+      "definition_id": "plot-table",
+      "parameters": {},
+      "position": {
+        "x": 2178.9266140917666,
+        "y": -382.6331537252087
+      }
+    },
+    {
+      "id": "workspace-file-1",
+      "definition_id": "workspace-file",
+      "parameters": {
+        "file name": "heaviside_01.jpg"
+      },
+      "position": {
+        "x": -435.4701552376972,
+        "y": 496.2494972873146
+      }
+    },
+    {
+      "id": "workspace-file-0",
+      "definition_id": "workspace-file",
+      "parameters": {
+        "file name": "heaviside_00.jpg"
+      },
+      "position": {
+        "x": -408.5541449013764,
+        "y": -357.61270427094104
+      }
+    },
+    {
+      "id": "image-roi-1",
+      "definition_id": "image-roi",
+      "parameters": {
+        "corner1": [
+          133,
+          72
+        ],
+        "corner2": [
+          764,
+          772
+        ],
+        "negate_y": false
+      },
+      "position": {
+        "x": 206.40674670998914,
+        "y": 473.0124003883109
+      }
+    },
+    {
+      "id": "image-loi-0",
+      "definition_id": "image-loi",
+      "parameters": {
+        "corner1": [
+          160,
+          300
+        ],
+        "corner2": [
+          730,
+          300
+        ],
+        "negate_y": true
+      },
+      "position": {
+        "x": 204.65976723989672,
+        "y": -359.2573689562017
+      }
+    },
+    {
+      "id": "title-doc-13",
+      "definition_id": "title-doc",
+      "parameters": {
+        "title": "Digital Image Correlation with pyvale"
+      },
+      "position": {
+        "x": 925.4349703040341,
+        "y": -800.9146431373362
+      }
+    },
+    {
+      "id": "paragraph-doc-14",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Define files to be loaded"
+      },
+      "position": {
+        "x": -388.7614282638739,
+        "y": -538.8107463085202
+      }
+    },
+    {
+      "id": "paragraph-doc-14-2",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# View & Select\n\nSelect the DIC ROI on the reference image (bottom view) and the extraction line on the reference image (top view). Keep the line inside the valid subset-centre mesh, inset from the ROI boundary by at least half a subset. Negate Y remains enabled for line extraction."
+      },
+      "position": {
+        "x": 208.63799418670652,
+        "y": -548.6305653065917
+      }
+    },
+    {
+      "id": "paragraph-doc-14-3",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Mesh Creation for the extraction"
+      },
+      "position": {
+        "x": 929.0334842653347,
+        "y": -517.6972733172815
+      }
+    },
+    {
+      "id": "paragraph-doc-14-4",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Subset DIC with pyvale\n\nUses pyvale.dic.calculate_2d with ZNSSD, affine subsets and an automatic bottom-left seed (inset from the ROI edges). Defaults: subsetSize=21 (odd pixels), subsetStep=10, maxDisplacement=10, threshold=0.9 (minimum correlation score). Smaller subsets/steps increase spatial resolution and cost.\n\nResults stay in memory; no DIC files are written. Failed subsets are excluded; cells require four valid adjacent centres. U0 is horizontal displacement; U1 is upward displacement in negative-Y mesh space. v_image preserves downward-positive image displacement. All displacements are in pixels.\n\nReference: https://computer-aided-validation-laboratory.github.io/pyvale/examples/dic/ex04_dic_challenge.html"
+      },
+      "position": {
+        "x": 976.0347562613379,
+        "y": 10.19551708860297
+      }
+    },
+    {
+      "id": "paragraph-doc-14-5",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Transfer DIC fields onto the line\n\nInterp/Clamp is retained from the Pyxel workflow. It clamps outside the mesh and can interpolate near holes; do not interpret those values as additional correlation measurements. Keep your extraction line inside a connected valid region."
+      },
+      "position": {
+        "x": 1553.3466979568352,
+        "y": -576.4234762456965
+      }
+    },
+    {
+      "id": "paragraph-doc-14-6",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Output \n\n- (top) Extracted data using the line\n- (bottom) Raw mesh visualisation"
+      },
+      "position": {
+        "x": 2168.9010206000266,
+        "y": -530.5142872491945
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Optional output into a file\n\nConnect a writer to export the data into a file\n\n- A Write Table to export a csv\n- A Write Mesh to export a mesh file for desktop visualisation (i.e. ParaView)"
+      },
+      "position": {
+        "x": 2893.423110813045,
+        "y": -546.2123048186515
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Image files and execution\n\nSupply your own image pair through the workspace selectors. Images are not bundled. pyvale uses native compiled extensions: run this workflow with a local Python backend, not browser-only Python."
+      },
+      "position": {
+        "x": -396.7327769251141,
+        "y": -1030.6479880830177
+      }
+    },
+    {
+      "id": "paragraph-doc-14-7-copy-copy",
+      "definition_id": "paragraph-doc",
+      "parameters": {
+        "text": "# Local Python backend\n\nStart a backend with the tested pyvale version and your image workspace:\n\n```bash\nuvx --with pyvale==2026.11.0 --python 3.14 flowgraph serve --workspace workspace_folder/\n```\n\nConnect via Run → Python Backend using the server address/token. The backend needs FlowGraph, Muscat, NumPy and pyvale. No image downloads or result-file writes are performed by this workflow."
+      },
+      "position": {
+        "x": -390.998224771017,
+        "y": -851.1883628226394
+      }
+    }
+  ],
+  "inputs": [],
+  "outputs": [],
+  "edges": [
+    {
+      "source_node": "read-image-1",
+      "source_port": "image",
+      "target_node": "user-function",
+      "target_port": "image_def"
+    },
+    {
+      "source_node": "read-image-0",
+      "source_port": "image",
+      "target_node": "user-function",
+      "target_port": "image_reff"
+    },
+    {
+      "source_node": "user-function",
+      "source_port": "output1",
+      "target_node": "mesh-sink",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "user-function",
+      "source_port": "output1",
+      "target_node": "transfer-fields",
+      "target_port": "source_data"
+    },
+    {
+      "source_node": "create-uniform-mesh-of-bars",
+      "source_port": "mesh",
+      "target_node": "transfer-fields",
+      "target_port": "target"
+    },
+    {
+      "source_node": "transfer-fields",
+      "source_port": "mesh_document",
+      "target_node": "mesh-to-table",
+      "target_port": "mesh"
+    },
+    {
+      "source_node": "mesh-to-table",
+      "source_port": "table",
+      "target_node": "plot-table",
+      "target_port": "table"
+    },
+    {
+      "source_node": "workspace-file-1",
+      "source_port": "path",
+      "target_node": "read-image-1",
+      "target_port": "path"
+    },
+    {
+      "source_node": "workspace-file-0",
+      "source_port": "path",
+      "target_node": "read-image-0",
+      "target_port": "path"
+    },
+    {
+      "source_node": "read-image-0",
+      "source_port": "image",
+      "target_node": "image-roi-1",
+      "target_port": "input"
+    },
+    {
+      "source_node": "image-roi-1",
+      "source_port": "roi",
+      "target_node": "user-function",
+      "target_port": "zone"
+    },
+    {
+      "source_node": "read-image-0",
+      "source_port": "image",
+      "target_node": "image-loi-0",
+      "target_port": "input"
+    },
+    {
+      "source_node": "image-loi-0",
+      "source_port": "point2",
+      "target_node": "create-uniform-mesh-of-bars",
+      "target_port": "stopPoint"
+    },
+    {
+      "source_node": "image-loi-0",
+      "source_port": "point1",
+      "target_node": "create-uniform-mesh-of-bars",
+      "target_port": "startPoint"
+    }
+  ]
+}
